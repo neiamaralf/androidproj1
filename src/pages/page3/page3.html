@@ -1,0 +1,29 @@
+<ion-header>
+  <new-navbar></new-navbar>
+  <ion-title  *ngIf="tarefaService.logged">logged</ion-title>
+</ion-header>
+ 
+<ion-content>
+
+  <ion-list>
+    <ion-item align-items-center *ngIf="tarefaService.logged">
+      <h1>logged</h1>
+    </ion-item>
+    <ion-item *ngFor="let item of items|async">
+      <span >
+        <img style="max-width: 80px; display: inline-block" src="http://www.athena3d.com.br/vilavielault/vilaviela/_imagens/{{item.foto}}" *ngIf="item.foto" />
+      </span>
+      <span (click)="itemTapped( item)" [ngStyle]="{'text-decoration':item.checked?'line-through':'none'}">
+        {{item.title}}
+       </span>
+
+      <button ion-button icon-only item-right clear (click)="detalhe($event, item)">
+      <ion-icon name="settings" item-right></ion-icon>
+    </button>
+      <button ion-button icon-only item-right clear (click)="removerTarefa($event,item)">
+      <ion-icon name="trash" color="danger"  item-right></ion-icon>
+    </button>
+    </ion-item>
+  </ion-list>
+</ion-content>
+<ion-footer ><page-rodape ></page-rodape></ion-footer>

@@ -1,0 +1,66 @@
+<ion-header>
+    <!--<ion-title text-center color="cor2">{{isEdited?"edit": pageTitle }}</ion-title>-->
+    <new-navbar></new-navbar>       
+</ion-header>
+
+<ion-content no-padding>
+   <ion-list>
+      
+      <ion-item *ngIf="hideForm" class="post-entry-message" text-wrap>
+       <h2>Cadastro realizado com sucesso!</h2>            
+      </ion-item>
+       <ion-item>
+   <button  ion-button item-left color="primary" icon-only clear (click)="back()">
+               <ion-icon name="arrow-back" ></ion-icon>
+              </button>
+              <button *ngIf="isEdited && !hideForm" ion-button item-right color="danger" icon-only clear (click)="deleteEntry()">
+               <ion-icon name="trash" ></ion-icon>
+              </button>
+   </ion-item> 
+      <ion-item *ngIf="!hideForm">
+         <form [formGroup]="form" (ngSubmit)="saveEntry()">
+            <ion-list>
+               <ion-item-group>
+                  <ion-item-divider color="light">fala teste *</ion-item-divider>
+                  <ion-item>
+                     <ion-input ng-value="" type="text" placeholder="Digite o nome de usuário..." formControlName="fala" [(ngModel)]="tarefaService.speechtext"></ion-input>
+                  </ion-item>
+               </ion-item-group>
+                <ion-item-group>
+                  <ion-item-divider color="light">Nome de usuário *</ion-item-divider>
+                  <ion-item>
+                     <ion-input ng-value="" type="text" placeholder="Digite o nome de usuário..." formControlName="name" [(ngModel)]="username"></ion-input>
+                  </ion-item>
+               </ion-item-group>
+               <ion-item-group>
+                  <ion-item-divider color="light">Email *</ion-item-divider>
+                  <ion-item>
+                     <ion-input  ng-value="" type="email" placeholder="Digite o email..." formControlName="email" [(ngModel)]="email"></ion-input>
+                  </ion-item>
+               </ion-item-group>
+               <ion-item-group>
+                  <ion-item-divider color="light">Senha *</ion-item-divider>
+                  <ion-item>
+                     <ion-input ng-value="" type="password" placeholder="Digite a senha..." formControlName="password"  [(ngModel)]="password"></ion-input>
+                  </ion-item>
+               </ion-item-group>
+               <ion-item-group>
+                  <ion-item-divider color="light">Confirmação Senha *</ion-item-divider>
+                  <ion-item>
+                     <ion-input ng-value="" type="password" placeholder="Digite novamente a senha..." formControlName="password2" [(ngModel)]="password2"  ></ion-input>
+                  </ion-item>
+               </ion-item-group>
+             <ion-item center>
+              
+              <button ion-button color="primary" text-center item-center [disabled]="!form.valid">
+               {{isEdited?"Salvar": "Cadastrar" }}
+              </button>
+             </ion-item>
+           </ion-list>
+         </form>
+      </ion-item>     
+     
+   </ion-list>
+   
+</ion-content>
+<ion-footer ><page-rodape ></page-rodape></ion-footer>

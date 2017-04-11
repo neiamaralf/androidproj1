@@ -1,0 +1,30 @@
+
+  <ion-grid   no-padding >
+    <ion-row align-items-center justify-content-center style="background-color: #A5CE37">
+      <ion-col col-2>
+        <button ion-button menuToggle style="color:white" clear >
+  <ion-icon name="menu"></ion-icon> 
+  </button> 
+      </ion-col>
+       <ion-col col-2>
+         <button ion-button  style="color:white" small clear (click)="soundOnOff($event)">
+        <ion-row  style="font-size:5pt"><ion-col  ><p >MEUS PONTOS</p><p>DESCONTOS</p></ion-col></ion-row>
+        </button> 
+      </ion-col>
+       <ion-col col-2>
+          <button ion-button  style="color:white"  clear (click)="micOnOff($event)">
+  <ion-row style="font-size:5pt"><ion-col ><p>SUGERIR</p><p>DENUNCIAR</p></ion-col></ion-row>
+  </button>
+      </ion-col>
+       <ion-col col-2>
+         <button ion-button  style="color:white;font-size:5pt" small clear (click)="soundOnOff($event)" >UPLOAD</button>
+      </ion-col>
+       <ion-col col-2>
+          <button ion-button style="color:white;font-size:5pt" small clear (click)="micOnOff($event)" >CONTATAR</button>
+      </ion-col> 
+       <ion-col col-2>
+          <button ion-button smal clear (click)="search(sb)"  style="color:red;font-size:5pt;text-shadow:white ">
+  PREMIUM</button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>  

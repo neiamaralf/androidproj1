@@ -1,0 +1,57 @@
+<ion-header>
+  <new-navbar></new-navbar> 
+</ion-header>
+
+<ion-content #ct padding>
+  <ion-list>
+    <ion-list-header color="cor2">Destaques</ion-list-header>
+    <ion-item no-padding no-margin>
+
+      <ion-card center>
+        <ion-grid no-margin>
+          <ion-row center no-margin>
+            <ion-col col-12 style="white-space: normal;vertical-align: middle" center text-center>
+              <img width="150" src="assets/img/destaque1.png">
+            </ion-col>
+            <ion-col top style="white-space: normal;font-size:smaller">
+              <h2 style="font-weight: bold">Chácara Rio Pequeno</h2>
+              <a href="http://www.bioatest/area234/video1">www.bioatest/area234/video1</a>
+              <p>Veja o vídeo da nossa produção! Temos pimentões laranjas, berinjelas e muito mais...</p>
+            </ion-col>
+            <ion-col top style="font-size:smaller" text-center>
+              <ion-row no-margin>
+                <ion-col text-color="cor3">
+                  <p style="color:#00A550">MARCO_AGRO</p>
+                  <ion-row center>
+                    <ion-col>
+                      <button ion-button clear color="black" (click)="micOnOff($event)">
+                 <img  src="assets/img/reload.png">
+                </button>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row center>
+                    <ion-col>
+                      <button ion-button clear color="black" (click)="micOnOff($event)">
+                       <img  src="assets/img/heart.png">
+                     </button>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row center>
+                    <ion-col center>
+                      
+                      <button ion-button clear small color="black" (click)="micOnOff($event)">   
+                       <span style="color: black"> 2.600  </span>             
+                       <img  src="assets/img/likesh.png">
+                      </button>
+                    </ion-col>
+                  </ion-row>
+                </ion-col>
+              </ion-row>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card>
+    </ion-item>
+  </ion-list>
+</ion-content>
+<ion-footer ><page-rodape ></page-rodape></ion-footer>
