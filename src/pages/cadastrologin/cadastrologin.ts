@@ -31,8 +31,8 @@ export class CadastroPage {
       "email": ["", Validators.required]
     });
     this.isEdited = NP.get('edit');;
-    this.username = tarefaService.dadosUsuario.nome;
-    this.email = tarefaService.dadosUsuario.email;
+    this.username ="";// tarefaService.dadosUsuario.nome;
+    this.email = "";//tarefaService.dadosUsuario.email;
   }
 
   
