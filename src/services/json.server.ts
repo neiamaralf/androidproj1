@@ -27,7 +27,7 @@ export class TarefaService {
         this.assertlogin();
         this.getUDfromstorage();
 
-       if(0){//plt.is('android')||plt.is('ios')){
+       if(plt.is('android')||plt.is('ios')){
         speechRecognition.isRecognitionAvailable()
             .then((available: boolean) => this.sendNotification(available))
         speechRecognition.startListening()
