@@ -3,7 +3,7 @@ import { Nav, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { HomePage } from '../pages/home/home';
-import { Page2 } from '../pages/page2/page2';
+import { Principal } from '../pages/principal/principal';
 import { Page3 } from '../pages/page3/page3';
 
 @Component({
@@ -20,7 +20,7 @@ export class BioatestApp {
     this.initializeApp();
     this.pages = [
       { title: 'Início', component: HomePage },
-      { title: 'Page Two', component: Page2 },
+      { title: 'Menu Principal', component: Principal },
       { title: 'Page 3', component: Page3 }
     ];
   }

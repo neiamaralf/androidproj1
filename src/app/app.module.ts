@@ -4,7 +4,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { BioatestApp } from './app.component';
 import { HomePage } from '../pages/home/home';
-import { Page2 } from '../pages/page2/page2';
+import { Principal } from '../pages/principal/principal';
 import { Page3 } from '../pages/page3/page3';
 import { newNavbar} from '../pages/cabecalho/cabecalho';
 import { Rodape } from '../pages/rodape/rodape'
@@ -17,7 +17,7 @@ import { SpeechRecognition } from '@ionic-native/speech-recognition';
   declarations: [
     BioatestApp,
     HomePage,
-    Page2, 
+    Principal, 
     Page3,
     newNavbar,
     Rodape,
@@ -30,7 +30,7 @@ import { SpeechRecognition } from '@ionic-native/speech-recognition';
   entryComponents: [
     BioatestApp,
     HomePage,
-    Page2,
+    Principal,
     Page3,
     newNavbar,
     Rodape,

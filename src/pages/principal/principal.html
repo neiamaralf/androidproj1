@@ -1,0 +1,36 @@
+<ion-header>
+    <new-navbar></new-navbar>
+</ion-header>
+
+<ion-content #con1 padding>
+    <!-- <ion-scroll style="height:100vh;" zoom="true" scrollY="true" maxZoom="10">-->
+    <ion-list-header *ngIf="!hasabaaberta" text-left style="color: black" color="cor2">
+        MENU PRINCIPAL
+    </ion-list-header>
+
+    <ion-list *ngFor="let item of items" (click)="itemTapped($event, item)">
+        <ion-list-header *ngIf="!hasabaaberta||item.show" text-right style="color: black" color="cor4">
+            {{item.title}}
+            <ion-icon *ngIf="hasabaaberta" name="arrow-down" item-right></ion-icon>
+            <ion-icon *ngIf="!hasabaaberta" name="arrow-forward" item-right></ion-icon>
+        </ion-list-header>
+        <ion-list *ngIf="item.show" style="background-color: white">
+            <ion-list-header *ngFor="let menuitem of item.menuitems" text-left style="color: white" color="cor2" (click)="itemTapped($event, item)">
+                {{menuitem.title}}
+                <button *ngIf="menuitem.tipo==0" ion-button color="light" icon-only small item-right clear (click)="menuitemclick($event,menuitem)">
+      <ion-icon name="create"   item-right></ion-icon>
+    </button>
+
+                <p color="light" *ngIf="menuitem.tipo==1" item-right>{{menuitem.title}} </p>
+            </ion-list-header>
+        </ion-list>
+    </ion-list>
+    <div *ngIf="selectedItem" padding>
+        You navigated here from <b>{{selectedItem.title}}</b>
+    </div>
+    <!--</ion-scroll>-->
+
+</ion-content>
+<ion-footer>
+    <page-rodape></page-rodape>
+</ion-footer>

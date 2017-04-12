@@ -2,10 +2,10 @@ import { Component,ViewChild } from '@angular/core';
 import { NavController, NavParams ,Content} from 'ionic-angular';
 import { TarefaService } from '../../services/json.server';
 @Component({
-  selector: 'page-page2',
-  templateUrl: 'page2.html'
+  selector: 'page-principal',
+  templateUrl: 'principal.html'
 })
-export class Page2 {
+export class Principal {
   @ViewChild('con1') cont: Content;
   selectedItem: any;
   hasabaaberta:boolean=false;
