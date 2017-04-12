@@ -4,6 +4,8 @@ import { TarefaService } from '../../services/json.server';
 import { ViewChild } from '@angular/core';
 import { CadastroPage } from '../../pages/cadastrologin/cadastrologin';
 import { Http, Headers, RequestOptions } from '@angular/http';
+//import { Facebook, FacebookLoginResponse } from '@ionic-native/facebook';
+
 @Component({
   selector: 'new-navbar',
   templateUrl: 'cabecalho.html'
@@ -12,7 +14,7 @@ export class newNavbar {
 
   @ViewChild('sb') _searchbar: Searchbar;
 
-  constructor(public http: Http, public navCtrl: NavController, public alertCtrl: AlertController, public tarefaService: TarefaService) {
+  constructor(/*private fb: Facebook,*/public http: Http, public navCtrl: NavController, public alertCtrl: AlertController, public tarefaService: TarefaService) {
 
   }
 
@@ -39,8 +41,21 @@ export class newNavbar {
     this.tarefaService.logout();
   }
 
+  permissoes = ['public_profile', 'user_friends', 'email', 'user_about_me'];
+  //loginResponse: FacebookLoginResponse;
+  perfil: any;
+
   login() {
-    let prompt = this.alertCtrl.create({
+    if(0){
+    /*this.fb.login(this.permissoes)
+      .then((res: FacebookLoginResponse) => {
+        this.loginResponse = res;
+        this.fb.api('/me?fields=picture,name', this.permissoes).then((o) => {
+          this.perfil = o;
+        });
+      }).catch(e => console.log('Erro', e));*/
+    }
+    else if(1){let prompt = this.alertCtrl.create({
 
       inputs: [{ type: 'email', name: 'email', placeholder: 'digite seu email' },
       { type: 'password', name: 'senha', placeholder: 'digite sua senha' }],
@@ -77,6 +92,7 @@ export class newNavbar {
     });
 
     prompt.present();
+    }
   }
 
   cadastrar(event) {
