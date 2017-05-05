@@ -1,9 +1,6 @@
 import { Component } from '@angular/core';
 import { TarefaService } from '../../services/json.server';
 import { NavController, NavParams } from 'ionic-angular';
-import { Observable } from 'rxjs/Observable';
-
-import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 @Component({
   selector: 'page-page3',
@@ -12,7 +9,7 @@ import 'rxjs/add/operator/map';
 export class Page3 {
   //items: Observable<DadosUsuario[]>;
   selectedItem: any;
-  constructor(private tarefaService: TarefaService, public navCtrl: NavController, public navParams: NavParams, public http: Http) {
+  constructor(private tarefaService: TarefaService, public navCtrl: NavController, public navParams: NavParams) {
     //this.items = tarefaService.get();   
   }
 

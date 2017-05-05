@@ -1,6 +1,10 @@
 {
-  "name": "bioatest4",
-  "app_id": "",
-  "v2": true,
-  "typescript": true
+    "name": "bioatest4",
+    "app_id": "",
+    "v2": true,
+    "typescript": true,
+    "proxies": [{
+        "path": "/bioatest",
+        "proxyUrl": "http://www.athena3d.com.br/bioatest"
+    }]
 }

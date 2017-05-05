@@ -1,62 +1,64 @@
-<ion-navbar #nv color="cor1"  hideBackButton >
-  <ion-grid no-padding >   
-   <ion-row left align-items-center justify-content-center>
-     <ion-col col-2  > 
-       <button ion-button menuToggle>
+<ion-navbar #nv color="cor1" hideBackButton>
+    <ion-grid no-padding>
+        <ion-row left align-items-center justify-content-center>
+            <ion-col col-2>
+                <button ion-button menuToggle>
          <ion-icon name="menu"></ion-icon>
       </button>
-     </ion-col>
-     <ion-col  justify-content-center  col-3> 
-       <img src="assets/img/icon.png" >
-     </ion-col>
-     <ion-col  align-items-end col-7>
-         <ion-grid no-padding>
-  <ion-row left>   
-    <ion-col col-12>
-       <ion-buttons end>
-    <button ion-button small icon-only color="black" (click)="soundOnOff($event)">
+            </ion-col>
+            <ion-col justify-content-center col-3>
+                <img src="assets/img/icon.png">
+            </ion-col>
+            <ion-col align-items-end col-7>
+                <ion-grid no-padding>
+                    <ion-row left>
+                        <ion-col col-12>
+                            <ion-buttons end>
+                                <button ion-button small icon-only color="black" (click)="soundOnOff($event)">
         <ion-icon  [name]="tarefaService.sound?'volume-up':'volume-off'"></ion-icon>
       </button>
-    <button ion-button icon-only color="black" (click)="micOnOff($event)">
+                                <button ion-button icon-only color="black" (click)="micOnOff($event)">
         <ion-icon [name]="tarefaService.mic?'mic':'mic-off'"></ion-icon>
       </button>
-    <button ion-button icon-only color="black" (click)="search()">
+                                <button ion-button icon-only color="black" (click)="search()">
        <ion-icon name="search"></ion-icon>
       </button>
 
-  </ion-buttons>
-    </ion-col>
-  </ion-row>
-  <ion-row style="flex: 0 0 auto">
-    <ion-col col-12>     
-      <ion-buttons end>
-        <button *ngIf="tarefaService.logged" small ion-button clear disable color="blue">  
-         <p style="font-size: 6pt"> Bem vindo {{tarefaService.dadosUsuario.nome}} </p>  
+                            </ion-buttons>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row style="flex: 0 0 auto">
+                        <ion-col col-12>
+                            <ion-buttons end>
+                                <button *ngIf="tarefaService.logged" small ion-button clear disable color="blue">  
+         <p style="font-size: 8pt"> Bem vindo {{tarefaService.dadosUsuario.nome}} </p>  
       </button>
-      <button *ngIf="tarefaService.logged" small ion-button clear icon-only color="blue" (click)="logout()">  
-         <p style="font-size: 6pt"> SAIR</p>  
+                                <button *ngIf="tarefaService.logged" small ion-button clear icon-only color="blue" (click)="logout()">  
+         <p style="font-size: 8pt"> SAIR</p>  
         <ion-icon name="log-out"></ion-icon>
       </button>
-      <button *ngIf="tarefaService.logged" small ion-button clear icon-only color="blue" (click)="editar()">  
+                                <!--<button *ngIf="tarefaService.logged" small ion-button clear icon-only color="blue" (click)="editar()">  
          <p style="font-size: 6pt"> EDITAR</p>  
         <ion-icon name="hammer"></ion-icon>
-      </button>
-      <button *ngIf="!tarefaService.logged" small ion-button clear icon-only color="red" (click)="login()">  
+      </button>-->
+                                <button *ngIf="!tarefaService.logged" small ion-button clear icon-only color="red" (click)="login()">  
          <p style="font-size: 6pt">ENTRAR</p>
         <ion-icon name="log-in"></ion-icon>
       </button>
-      <button *ngIf="!tarefaService.logged" small ion-button clear  color="red" (click)="cadastrar()">  
+                                <button *ngIf="!tarefaService.logged" small ion-button clear color="red" (click)="cadastrar()">  
        <p style="font-size: 6pt">CADASTRAR</p>
       </button>
-      </ion-buttons>
-    
- 
-    </ion-col></ion-row></ion-grid>
-     </ion-col>
-   </ion-row>
-  </ion-grid>
-      
-      
-   
-  <ion-searchbar #sb *ngIf="tarefaService.searchbar" foc="tarefaService.searchbar" (ionInput)="getItems($event)"></ion-searchbar>
+                            </ion-buttons>
+
+
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+
+
+    <ion-searchbar #sb *ngIf="tarefaService.searchbar" foc="tarefaService.searchbar" (ionInput)="getItems($event)"></ion-searchbar>
 </ion-navbar>

@@ -8,9 +8,9 @@ import { TarefaService } from '../../services/json.server';
 })
 export class HomePage {
 
-  constructor(  public tarefaService: TarefaService) {
+  constructor( public tarefaService: TarefaService) {
    
-     
+  
   }
 
   

@@ -1,66 +1,140 @@
 <ion-header>
-    <!--<ion-title text-center color="cor2">{{isEdited?"edit": pageTitle }}</ion-title>-->
-    <new-navbar></new-navbar>       
+    <!--<ion-title text-center color="cor2">{{tarefaService.isEdited?"edit": pageTitle }}</ion-title>-->
+    <new-navbar></new-navbar>
 </ion-header>
 
 <ion-content no-padding>
-   <ion-list>
-      
-      <ion-item *ngIf="hideForm" class="post-entry-message" text-wrap>
-       <h2>Cadastro realizado com sucesso!</h2>            
-      </ion-item>
-       <ion-item>
-   <button  ion-button item-left color="primary" icon-only clear (click)="back()">
+    <ion-list>
+
+        <ion-item *ngIf="tarefaService.hideForm" class="post-entry-message" text-wrap>
+            <h2>Cadastro realizado com sucesso!</h2>
+        </ion-item>
+        <ion-item>
+            <button ion-button item-left color="primary" icon-only clear (click)="back()">
                <ion-icon name="arrow-back" ></ion-icon>
               </button>
-              <button *ngIf="isEdited && !hideForm" ion-button item-right color="danger" icon-only clear (click)="deleteEntry()">
+            <button *ngIf="tarefaService.isEdited && !tarefaService.hideForm" ion-button item-right color="danger" icon-only clear (click)="deleteEntry()">
                <ion-icon name="trash" ></ion-icon>
               </button>
-   </ion-item> 
-      <ion-item *ngIf="!hideForm">
-         <form [formGroup]="form" (ngSubmit)="saveEntry()">
-            <ion-list>
-               <ion-item-group>
-                  <ion-item-divider color="light">fala teste *</ion-item-divider>
-                  <ion-item>
-                     <ion-input ng-value="" type="text" placeholder="Digite o nome de usuário..." formControlName="fala" [(ngModel)]="tarefaService.speechtext"></ion-input>
-                  </ion-item>
-               </ion-item-group>
-                <ion-item-group>
-                  <ion-item-divider color="light">Nome de usuário *</ion-item-divider>
-                  <ion-item>
-                     <ion-input ng-value="" type="text" placeholder="Digite o nome de usuário..." formControlName="name" [(ngModel)]="username"></ion-input>
-                  </ion-item>
-               </ion-item-group>
-               <ion-item-group>
-                  <ion-item-divider color="light">Email *</ion-item-divider>
-                  <ion-item>
-                     <ion-input  ng-value="" type="email" placeholder="Digite o email..." formControlName="email" [(ngModel)]="email"></ion-input>
-                  </ion-item>
-               </ion-item-group>
-               <ion-item-group>
-                  <ion-item-divider color="light">Senha *</ion-item-divider>
-                  <ion-item>
-                     <ion-input ng-value="" type="password" placeholder="Digite a senha..." formControlName="password"  [(ngModel)]="password"></ion-input>
-                  </ion-item>
-               </ion-item-group>
-               <ion-item-group>
-                  <ion-item-divider color="light">Confirmação Senha *</ion-item-divider>
-                  <ion-item>
-                     <ion-input ng-value="" type="password" placeholder="Digite novamente a senha..." formControlName="password2" [(ngModel)]="password2"  ></ion-input>
-                  </ion-item>
-               </ion-item-group>
-             <ion-item center>
-              
-              <button ion-button color="primary" text-center item-center [disabled]="!form.valid">
-               {{isEdited?"Salvar": "Cadastrar" }}
+        </ion-item>
+        <ion-item *ngIf="!tarefaService.hideForm&&tarefaService.mostraCep">
+            <form [formGroup]="cepform" (ngSubmit)="tarefaService.pesquisaCep()">
+                <ion-list>
+                    <ion-item-group>
+                        <ion-item-divider color="light">CEP</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="tel" placeholder="Digite o seu CEP..." formControlName="cep" [(ngModel)]="tarefaService.dadosUsuario.cep"></ion-input>
+
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item center>
+
+                        <button ion-button color="primary" text-center item-center [disabled]="!cepform.valid">
+                          CONTINUAR
+                        </button>
+                    </ion-item>
+                </ion-list>
+            </form>
+            <button ion-button item-right color="primary" (click)="showdlgCEP()">PESQUISAR CEP</button>
+        </ion-item>
+        <ion-item *ngIf="!tarefaService.hideForm&&!tarefaService.mostraCep">
+            <form [formGroup]="form" (ngSubmit)="saveEntry()">
+                <ion-list>
+                    <!--<ion-item-group>
+                        <ion-item-divider color="light">fala teste *</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="text" placeholder="Digite o nome de usuário..." formControlName="fala" [(ngModel)]="tarefaService.speechtext"></ion-input>
+                        </ion-item>
+                    </ion-item-group>-->
+
+                    <ion-item-group hidden="tarefaService.tabela=='certificadoras'">
+                        <ion-item-divider color="light">Quem você é?</ion-item-divider>
+                        <ion-item>
+                            <ion-select formControlName="tipo" [(ngModel)]="tarefaService.dadosUsuario.tipo">
+                                <ion-option value="0">Cliente</ion-option>
+                                <ion-option value="1">Ponto de Venda</ion-option>
+                                <ion-option value="2">Produtor</ion-option>
+                            </ion-select>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item-group>
+                        <ion-item-divider color="light">{{tarefaService.tabela=="certificadoras"?"Nome da certificadora":"Nome de usuário"}} *</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="text" placeholder="Digite o nome de usuário..." formControlName="name" [(ngModel)]="tarefaService.dadosUsuario.nome"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item-group>
+                        <ion-item-divider color="light">Email *</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="email" placeholder="Digite o email..." formControlName="email" [(ngModel)]="tarefaService.dadosUsuario.email"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item-group>
+                        <ion-item-divider color="light">CEP</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="text" placeholder="Digite o CEP..." item-left formControlName="cep" [(ngModel)]="tarefaService.dadosUsuario.cep"></ion-input>
+                            <button ion-button color="primary" text-center item-right (click)="showcep()">Alterar</button>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item-group>
+                        <ion-item-divider color="light">Endereço</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="text" placeholder="Digite o endereço completo..." formControlName="endereco" [(ngModel)]="tarefaService.dadosUsuario.endereco"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item-group>
+                        <ion-item-divider color="light">Número e complemento *</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="number" placeholder="Digite o número..." formControlName="numero" [(ngModel)]="tarefaService.dadosUsuario.numero"></ion-input>
+                            <ion-input ng-value="" type="text" placeholder="Digite o complemento..." [ngModelOptions]="{standalone: true}" [(ngModel)]="tarefaService.dadosUsuario.complemento"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item-group>
+                        <ion-item-divider color="light">Bairro</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="text" placeholder="Digite o bairro..." formControlName="bairro" [(ngModel)]="tarefaService.dadosUsuario.bairro"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item-group>
+                        <ion-item-divider color="light">Fone *</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="tel" placeholder="Digite o telefone..." formControlName="fone" [(ngModel)]="tarefaService.dadosUsuario.fone"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+
+                    <ion-item-group>
+                        <ion-item-divider color="light">Cidade e Estado</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="text" placeholder="Digite a cidade..." formControlName="cidade" [(ngModel)]="tarefaService.dadosUsuario.cidade"></ion-input>
+                            <ion-input ng-value="" type="text" placeholder="Digite o estado..." formControlName="estado" [(ngModel)]="tarefaService.dadosUsuario.estado"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+
+                    <ion-item-group hidden="tarefaService.tabela=='certificadoras'">
+                        <ion-item-divider color="light">Senha *</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="password" placeholder="Digite a senha..." formControlName="password" [(ngModel)]="tarefaService.dadosUsuario.password"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item-group hidden="tarefaService.tabela=='certificadoras'">
+                        <ion-item-divider color="light">Confirmação Senha *</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="password" placeholder="Digite novamente a senha..." formControlName="password2" [(ngModel)]="tarefaService.dadosUsuario.password2"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item center>
+
+                        <button ion-button color="primary" text-center item-center [disabled]="!form.valid">
+               {{tarefaService.isEdited?"Salvar": "Cadastrar" }}
               </button>
-             </ion-item>
-           </ion-list>
-         </form>
-      </ion-item>     
-     
-   </ion-list>
-   
+                    </ion-item>
+                </ion-list>
+            </form>
+        </ion-item>
+
+    </ion-list>
+
 </ion-content>
-<ion-footer ><page-rodape ></page-rodape></ion-footer>
+<ion-footer>
+    <page-rodape></page-rodape>
+</ion-footer>

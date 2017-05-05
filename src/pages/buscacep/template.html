@@ -1,0 +1,57 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-title>
+            Buscar CEP
+        </ion-title>
+        <ion-buttons start>
+            <button ion-button (click)="dismiss()">
+        <span ion-text color="primary" showWhen="ios">Cancel</span>
+        <ion-icon name="md-close" ></ion-icon>
+      </button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <ion-list>
+        <ion-item-group>
+            <ion-item-divider color="light">UF</ion-item-divider>
+            <ion-item>
+                <ion-select [(ngModel)]="UF">
+                    <ion-option *ngFor="let uf of UFList.ufs" value="{{uf.sigla}}">{{uf.sigla}}</ion-option>
+                </ion-select>
+            </ion-item>
+        </ion-item-group>
+        <ion-item-group>
+            <ion-item-divider color="light">Cidade</ion-item-divider>
+            <ion-item>
+                <ion-input type="text" placeholder="Digite a cidade..." [(ngModel)]="cidade"></ion-input>
+            </ion-item>
+        </ion-item-group>
+        <ion-item-group>
+            <ion-item-divider color="light">Endereço</ion-item-divider>
+            <ion-item>
+                <ion-input type="text" placeholder="Digite o endereço..." [(ngModel)]="endereco"></ion-input>
+            </ion-item>
+        </ion-item-group>
+        <ion-item-group>
+
+            <ion-item>
+                <button ion-button (click)="initbuscaCEP()">Pesquisar CEP</button>
+            </ion-item>
+        </ion-item-group>
+
+    </ion-list>
+    <ion-list>
+        <ion-item *ngFor="let res of CEPList">
+            <button ion-item text-wrap (click)="preencheCEP(res)">
+                {{res.endereco}} - {{res.bairro}} - {{res.cidade}} - {{res.estado}} - {{res.cep}}
+           </button>
+
+        </ion-item>
+    </ion-list>
+    <ion-infinite-scroll *ngIf="cansearchCEP" (ionInfinite)="buscarCEP($event)">
+        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+</ion-content>

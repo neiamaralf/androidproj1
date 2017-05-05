@@ -4,6 +4,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { BioatestApp } from './app.component';
 import { HomePage } from '../pages/home/home';
+import { BuscaCEPPage } from '../pages/buscacep/pages';
 import { Principal } from '../pages/principal/principal';
 import { Page3 } from '../pages/page3/page3';
 import { newNavbar} from '../pages/cabecalho/cabecalho';
@@ -12,7 +13,6 @@ import { TarefaService} from '../services/json.server';
 import { CadastroPage } from '../pages/cadastrologin/cadastrologin';
 import {TextToSpeech} from '@ionic-native/text-to-speech';
 import { SpeechRecognition } from '@ionic-native/speech-recognition';
-
 @NgModule({
   declarations: [
     BioatestApp,
@@ -21,7 +21,8 @@ import { SpeechRecognition } from '@ionic-native/speech-recognition';
     Page3,
     newNavbar,
     Rodape,
-    CadastroPage
+    CadastroPage,
+    BuscaCEPPage
   ],
   imports: [
     IonicModule.forRoot(BioatestApp)
@@ -34,7 +35,8 @@ import { SpeechRecognition } from '@ionic-native/speech-recognition';
     Page3,
     newNavbar,
     Rodape,
-    CadastroPage
+    CadastroPage,
+    BuscaCEPPage
   ],
   providers: [SpeechRecognition,TextToSpeech,StatusBar,SplashScreen,newNavbar,Rodape,TarefaService,{provide: ErrorHandler, useClass: IonicErrorHandler}]
 })
