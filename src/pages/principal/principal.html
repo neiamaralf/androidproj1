@@ -14,6 +14,7 @@
             <span item-right style="color: white">{{
                 item.id==1&&item.show?(ts.dadosUsuario.tipo==0?"USUÁRIO":(ts.dadosUsuario.tipo==1)?"PONTO DE VENDA":(ts.dadosUsuario.tipo==2)?"PRODUTOR":"ADMINISTRADOR"):""
                 }}</span>
+
             <button *ngIf="item.title=='CERTIFICADORAS'" ion-button color="light" icon-only item-right clear (click)="novacert($event,item)">                 
                   <ion-icon  name="add-circle" item-right></ion-icon>
                 </button>
@@ -49,17 +50,20 @@
         <ion-list *ngFor="let menuitem of item.menuitems" style="background-color: white">
             <ion-list-header *ngIf="item.show" text-left style="color: white" color="cor2" (click)="itemTapped($event, item)">
                 {{menuitem.title}}
-                <button *ngIf="menuitem.tipo!=1" ion-button color="light" icon-only small item-right clear (click)="menuitemclick(item,menuitem)">
+                <button *ngIf="item.title=='CERTIFICADORAS'" ion-button item-right color="light" icon-only clear (click)="deleteEntry(menuitem)">
+                  <ion-icon name="trash" ></ion-icon>
+                </button>
+                <button *ngIf="menuitem.tipo!=1||item.title!='MEU BIOATEST'" ion-button color="light" icon-only small item-right clear (click)="menuitemclick(item,menuitem)">
                  <ion-icon name="create"   item-right></ion-icon>
                 </button>
                 <p color="light" *ngIf="menuitem.tipo==1" item-right>{{menuitem.title}} </p>
 
-                <button ion-button color="light" icon-only small item-right clear (click)="showhideclick($event,menuitem)">                 
+                <button *ngIf="item.title!='CERTIFICADORAS'" ion-button color="light" icon-only small item-right clear (click)="showhideclick($event,menuitem)">                 
                  <ion-icon *ngIf="menuitem.showdados" name="arrow-dropdown" item-right></ion-icon>
                  <ion-icon *ngIf="!menuitem.showdados" name="arrow-dropright" item-right></ion-icon>
                 </button>
             </ion-list-header>
-            <ion-list no-lines *ngIf="menuitem.showdados&&item.show&&item.id==1&&menuitem.tipo==0" style="background-color: white">
+            <ion-list no-lines *ngIf="menuitem.showdados&&item.show&&(item.id==1&&menuitem.tipo==0)" style="background-color: white">
                 <ion-item>NOME: {{ts.dadosUsuario.nome}}</ion-item>
                 <ion-item>EMAIL: {{ts.dadosUsuario.email}}</ion-item>
                 <ion-item text-wrap>ENDEREÇO: {{ts.dadosUsuario.endereco}},{{ts.dadosUsuario.numero}} {{ts.dadosUsuario.cidade}}-{{ts.dadosUsuario.estado}}</ion-item>

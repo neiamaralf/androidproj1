@@ -41,8 +41,8 @@ export class Principal {
   }
 
   menuitemclick(item,menuitem){
-    if (item.title == "CERTIFICADORAS") {
-      this.navCtrl.push(CadastroPage, { edit: true, getcep: false, tabela: "certificadoras" });
+    if (item.title == "CERTIFICADORAS") {      
+      this.navCtrl.push(CadastroPage, { edit: true, getcep: false, tabela: "certificadoras",idcert:menuitem.tipo });
     }
     else if (item.title == "MEU BIOATEST") {
       if (menuitem.tipo == 0) {
@@ -58,6 +58,11 @@ export class Principal {
 
   showhideclick(event,menuitem){
    menuitem.showdados = !menuitem.showdados;
+  }
+
+  deleteEntry(menuitem){
+    this.ts.tabela="certificadoras";
+     this.ts.deleteEntry(menuitem.tipo);
   }
 
   itemTapped(event, item) {

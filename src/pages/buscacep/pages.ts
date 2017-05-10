@@ -24,17 +24,23 @@ export class BuscaCEPPage {
    this.cadPG=this.params.get('cadastroPag');
   }
 
-buscarCEP(infiniteScroll){
-  //if (this.cansearchCEP){
+buscarCEP(): Promise<any>{
+  if (this.cansearchCEP){
+    return new Promise((resolve) => {
      setTimeout(() => {
-    this.ts.getCEPList(this, infiniteScroll);
+    this.ts.getCEPList(this);
+    resolve();
      },500);
-  //}
+    });
+  }
+  else return null;
 }
 
 initbuscaCEP(){
   this.CEPList=[];
   this.cansearchCEP=true;
+  this.offset=0;
+  this.buscarCEP();
 }
 
 preencheCEP(result:any){

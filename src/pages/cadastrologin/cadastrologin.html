@@ -13,7 +13,7 @@
             <button ion-button item-left color="primary" icon-only clear (click)="back()">
                <ion-icon name="arrow-back" ></ion-icon>
               </button>
-            <button *ngIf="tarefaService.isEdited && !tarefaService.hideForm" ion-button item-right color="danger" icon-only clear (click)="deleteEntry()">
+            <button *ngIf="tarefaService.isEdited && !tarefaService.hideForm && tarefaService.tabela!='certificadoras'" ion-button item-right color="danger" icon-only clear (click)="deleteEntry()">
                <ion-icon name="trash" ></ion-icon>
               </button>
         </ion-item>
@@ -47,7 +47,7 @@
                         </ion-item>
                     </ion-item-group>-->
 
-                    <ion-item-group hidden="tarefaService.tabela=='certificadoras'">
+                    <ion-item-group *ngIf="tarefaService.tabela=='usuarios'&&tarefaService.dadosUsuario.tipo!=3">
                         <ion-item-divider color="light">Quem você é?</ion-item-divider>
                         <ion-item>
                             <ion-select formControlName="tipo" [(ngModel)]="tarefaService.dadosUsuario.tipo">
@@ -60,13 +60,19 @@
                     <ion-item-group>
                         <ion-item-divider color="light">{{tarefaService.tabela=="certificadoras"?"Nome da certificadora":"Nome de usuário"}} *</ion-item-divider>
                         <ion-item>
-                            <ion-input ng-value="" type="text" placeholder="Digite o nome de usuário..." formControlName="name" [(ngModel)]="tarefaService.dadosUsuario.nome"></ion-input>
+                            <ion-input ng-value="" type="text" [placeholder]="tarefaService.tabela=='certificadoras'?'Digite o nome da certificadora...':'Digite o nome de usuário...'" formControlName="name" [(ngModel)]="tarefaService.dadosUsuario.nome"></ion-input>
                         </ion-item>
                     </ion-item-group>
                     <ion-item-group>
                         <ion-item-divider color="light">Email *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="email" placeholder="Digite o email..." formControlName="email" [(ngModel)]="tarefaService.dadosUsuario.email"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item-group *ngIf="tarefaService.tabela=='certificadoras'">
+                        <ion-item-divider color="light">Site</ion-item-divider>
+                        <ion-item>
+                            <ion-input ng-value="" type="url" placeholder="Digite o website..." formControlName="site" [(ngModel)]="tarefaService.dadosUsuario.site"></ion-input>
                         </ion-item>
                     </ion-item-group>
                     <ion-item-group>
@@ -110,13 +116,13 @@
                         </ion-item>
                     </ion-item-group>
 
-                    <ion-item-group hidden="tarefaService.tabela=='certificadoras'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='certificadoras'">
                         <ion-item-divider color="light">Senha *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="password" placeholder="Digite a senha..." formControlName="password" [(ngModel)]="tarefaService.dadosUsuario.password"></ion-input>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group hidden="tarefaService.tabela=='certificadoras'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='certificadoras'">
                         <ion-item-divider color="light">Confirmação Senha *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="password" placeholder="Digite novamente a senha..." formControlName="password2" [(ngModel)]="tarefaService.dadosUsuario.password2"></ion-input>

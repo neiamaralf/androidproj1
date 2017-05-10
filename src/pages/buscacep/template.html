@@ -50,7 +50,7 @@
 
         </ion-item>
     </ion-list>
-    <ion-infinite-scroll *ngIf="cansearchCEP" (ionInfinite)="buscarCEP($event)">
+    <ion-infinite-scroll *ngIf="cansearchCEP" (ionInfinite)="$event.waitFor(buscarCEP($event))">
         <ion-infinite-scroll-content></ion-infinite-scroll-content>
     </ion-infinite-scroll>
 

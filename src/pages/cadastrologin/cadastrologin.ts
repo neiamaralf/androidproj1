@@ -14,6 +14,8 @@ export class CadastroPage {
   public cepform: FormGroup;
 
   constructor(public modalCtrl: ModalController,public navCtrl: NavController, public tarefaService: TarefaService,  public NP: NavParams, public fb: FormBuilder,public alertCtrl: AlertController) {
+    this.tarefaService.tabela = NP.get('tabela');
+    let validatorok:boolean=this.tarefaService.tabela=="usuario";
     this.form = fb.group({
       "name": ["", Validators.required],
       "fala": ["", Validators.nullValidator],
@@ -24,8 +26,9 @@ export class CadastroPage {
       "cidade": ["", Validators.required],
       "estado": ["", Validators.required],
       "fone": ["", Validators.required],
-      "password": ["", Validators.required],
-      "password2": ["", Validators.required],
+      "site": ["",Validators.nullValidator],
+      "password": ["",validatorok? Validators.required:Validators.nullValidator],
+      "password2": ["", validatorok? Validators.required:Validators.nullValidator],
       "email": ["", Validators.required],
       "cep": ["", Validators.required]
     });   
@@ -38,9 +41,17 @@ export class CadastroPage {
       "cep": ["", Validators.required]
     });
     this.tarefaService.isEdited = NP.get('edit');
-    this.tarefaService.tabela = NP.get('tabela');
+    
     if(this.tarefaService.isEdited)this.form.controls["tipo"].disable(true);
     this.tarefaService.mostraCep = NP.get('getcep');
+    
+    if(this.tarefaService.tabela=="certificadoras"){
+      if(this.tarefaService.isEdited)
+       tarefaService.getCertDados(NP.get('idcert'));
+      else
+       tarefaService.resetFields();
+    }
+    else
     tarefaService.getUDfromstorage();
   }
 
@@ -61,7 +72,18 @@ export class CadastroPage {
       return;
     }    
     if (this.tarefaService.isEdited){
-      this.tarefaService.updateEntry();
+      if(this.tarefaService.tabela=="usuarios"){
+         this.tarefaService.storage.ready().then(() => {
+            this.tarefaService.storage.get('userid').then((userid) => {
+                this.tarefaService.updateEntry(userid);
+            });
+
+        });
+      }
+      else  if(this.tarefaService.tabela=="certificadoras"){
+        this.tarefaService.updateEntry(this.NP.get('idcert'));
+      }
+      
       this.navCtrl.pop();
     }
     else
@@ -69,10 +91,14 @@ export class CadastroPage {
     
   } 
 
-  deleteEntry() {   
-    this.tarefaService.deleteEntry();
-    this.navCtrl.pop();
-  } 
+   deleteEntry() {
+     this.tarefaService.storage.ready().then(() => {
+       this.tarefaService.storage.get('userid').then((userid) => {
+         this.tarefaService.deleteEntry(userid);
+         this.navCtrl.pop();
+       });
+     });
+   } 
 
   back() {
     this.tarefaService.getUDfromstorage();
