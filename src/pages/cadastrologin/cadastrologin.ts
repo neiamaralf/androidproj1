@@ -78,26 +78,26 @@ export class CadastroPage {
       if(this.tarefaService.tabela=="usuarios"){
          this.tarefaService.storage.ready().then(() => {
             this.tarefaService.storage.get('userid').then((userid) => {
-                this.tarefaService.updateEntry(userid,);
+                this.tarefaService.updateEntry(userid,this.formvariables);
             });
 
         });
       }
       else  if(this.tarefaService.tabela=="certificadoras"){
-        this.tarefaService.updateEntry(this.NP.get('idcert'));
+        this.tarefaService.updateEntry(this.NP.get('idcert'),this.formvariables);
       }
       
       this.navCtrl.pop();
     }
     else
-      this.tarefaService.createEntry(this.navCtrl,Principal);
+      this.tarefaService.createEntry(this.navCtrl,Principal,this.formvariables);
     
   } 
 
    deleteEntry() {
      this.tarefaService.storage.ready().then(() => {
        this.tarefaService.storage.get('userid').then((userid) => {
-         this.tarefaService.deleteEntry(userid);
+         this.tarefaService.deleteEntry(userid,this.formvariables);
          this.navCtrl.pop();
        });
      });

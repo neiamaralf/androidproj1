@@ -83,7 +83,7 @@ export class Principal {
 
   menuitemclick(item, menuitem) {
     if (item.title == "CERTIFICADORAS") {
-      this.navCtrl.push(CadastroPage, { edit: true, getcep: false, tabela: "certificadoras", formvariables: menuitem.dbdata });
+      this.navCtrl.push(CadastroPage, { edit: true, getcep: false, tabela: "certificadoras",idcert:menuitem.tipo, formvariables: menuitem.dbdata });
     }
     else if (item.title == "MEU BIOATEST") {
       if (menuitem.tipo == 0) {
@@ -99,7 +99,7 @@ export class Principal {
 
   deleteEntry(menuitem) {
     this.ts.tabela = "certificadoras";
-    this.ts.deleteEntry(menuitem.tipo);
+    this.ts.deleteEntry(menuitem.tipo,menuitem.dbdata);
     event.stopPropagation();
   }
 
