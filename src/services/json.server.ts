@@ -7,7 +7,7 @@ import {AlertController,  ToastController, Platform } from 'ionic-angular';
 
 //import { Facebook, FacebookLoginResponse } from '@ionic-native/facebook';
 
-class DadosUsuario {
+export class DadosUsuario {
     public nome: string = "";
     public email: string = "";
     public endereco: string = "";
@@ -96,21 +96,21 @@ export class TarefaService {
         });
     }
 
-    createEntry(nav:any,page:any) {
+    createEntry(nav:any,page:any,formvariables) {
         let body: string =
-            "key=create&name=" + this.dadosUsuario.nome +
-            "&password=" + this.dadosUsuario.password +
-            "&email=" + this.dadosUsuario.email +
-            "&endereco=" + this.dadosUsuario.endereco +
-            "&estado=" + this.dadosUsuario.estado +
-            "&cidade=" + this.dadosUsuario.cidade +
-            "&bairro=" + this.dadosUsuario.bairro +
-            "&numero=" + this.dadosUsuario.numero +
-            "&complemento=" + this.dadosUsuario.complemento +
-            "&fone=" + this.dadosUsuario.fone +
-            "&cep=" + this.dadosUsuario.cep +
-            "&tipo=" + this.dadosUsuario.tipo +
-            "&site=" + this.dadosUsuario.site +
+            "key=create&name=" + formvariables.nome +
+            "&password=" + formvariables.password +
+            "&email=" + formvariables.email +
+            "&endereco=" + formvariables.endereco +
+            "&estado=" + formvariables.estado +
+            "&cidade=" + formvariables.cidade +
+            "&bairro=" + formvariables.bairro +
+            "&numero=" + formvariables.numero +
+            "&complemento=" + formvariables.complemento +
+            "&fone=" + formvariables.fone +
+            "&cep=" + formvariables.cep +
+            "&tipo=" + formvariables.tipo +
+            "&site=" + formvariables.site +
             "&tabela=" + this.tabela,
             type: string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers: any = new Headers({ 'Content-Type': type }),
@@ -122,7 +122,7 @@ export class TarefaService {
                 console.log(data);
                 if (data.insert === "ok") {      
                     if (this.tabela == "usuarios") {
-                        this.dologin(this.dadosUsuario.email, this.dadosUsuario.password, false, nav, page);
+                        this.dologin(formvariables.email, formvariables.password, false, nav, page);
                         this.sendNotification(`O usuário: ${name} foi cadastrado com sucesso!`);
                     }
                     else if (this.tabela == "certificadoras"){
@@ -140,22 +140,22 @@ export class TarefaService {
             });
     }
 
-    updateEntry(userid) {
+    updateEntry(userid,formvariables) {
         let body: string =
-            "key=update&username=" + this.dadosUsuario.nome +
+            "key=update&username=" + formvariables.nome +
             "&recordID=" + userid +
-            "&password=" + this.dadosUsuario.password +
-            "&email=" + this.dadosUsuario.email +
-            "&endereco=" + this.dadosUsuario.endereco +
-            "&estado=" + this.dadosUsuario.estado +
-            "&cidade=" + this.dadosUsuario.cidade +
-            "&bairro=" + this.dadosUsuario.bairro +
-            "&numero=" + this.dadosUsuario.numero +
-            "&complemento=" + this.dadosUsuario.complemento +
-            "&site=" + this.dadosUsuario.site +
-            "&fone=" + this.dadosUsuario.fone +
-            "&cep=" + this.dadosUsuario.cep +
-            "&tipo=" + this.dadosUsuario.tipo +
+            "&password=" + formvariables.password +
+            "&email=" + formvariables.email +
+            "&endereco=" + formvariables.endereco +
+            "&estado=" + formvariables.estado +
+            "&cidade=" + formvariables.cidade +
+            "&bairro=" + formvariables.bairro +
+            "&numero=" + formvariables.numero +
+            "&complemento=" + formvariables.complemento +
+            "&site=" + formvariables.site +
+            "&fone=" + formvariables.fone +
+            "&cep=" + formvariables.cep +
+            "&tipo=" + formvariables.tipo +
             "&tabela=" + this.tabela,
             type: string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers: any = new Headers({ 'Content-Type': type }),
@@ -184,8 +184,8 @@ export class TarefaService {
         });
     }
 
-    deleteEntry(userid) {            
-        let name: string = this.dadosUsuario.nome,
+    deleteEntry(userid,formvariables) {            
+        let name: string = formvariables.nome,
             body: string = "key=delete&recordID=" + userid +
                 "&tabela=" + this.tabela,
             type: string = "application/x-www-form-urlencoded; charset=UTF-8",
@@ -210,8 +210,8 @@ export class TarefaService {
     }
 
 
-    pesquisaCep() {
-        let body: string = "key=buscacep&cep=" + this.dadosUsuario.cep,
+    pesquisaCep(formvariables) {
+        let body: string = "key=buscacep&cep=" + formvariables.cep,
             type: string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers: any = new Headers({ 'Content-Type': type }),
             options: any = new RequestOptions({ headers: headers }),
@@ -222,10 +222,10 @@ export class TarefaService {
                 console.log(data);
                 if (data[0].cepok == "true") {
                     this.mostraCep = false;
-                    this.dadosUsuario.endereco = data[0].endereco;
-                    this.dadosUsuario.cidade = data[0].cidade;
-                    this.dadosUsuario.bairro = data[0].bairro;
-                    this.dadosUsuario.estado = data[0].estado;
+                    formvariables.endereco = data[0].endereco;
+                    formvariables.cidade = data[0].cidade;
+                    formvariables.bairro = data[0].bairro;
+                    formvariables.estado = data[0].estado;
                 }
                 else {
                     this.sendNotification('CEP inválido!');
@@ -331,43 +331,62 @@ export class TarefaService {
             headers: any = new Headers({ 'Content-Type': type }),
             options: any = new RequestOptions({ headers: headers }),
             url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=cert";
-        let obs = this.http.get(url, options);
-
-        obs.map(res => res.json())
+        this.http.get(url, options).map(res => res.json())
             .subscribe((data) => {
                 console.log(data);
                 mn.menuitems=[];
                 this.retdata=data;
                 console.log(this.retdata);
-                if(this.retdata[0].nome!="null"){
-                 this.retdata.forEach(element => {
-                  mn.menuitems.push({title:element.nome,tipo:element.id,showdados:false});
-                 });
-                }                
+                if (this.retdata[0].nome != "null") {
+                    this.retdata.forEach(row => {
+
+                        mn.menuitems.push({
+                            title: row.nome, tipo: row.id, showdados: false, linhas: [
+                                { title: 'NOME', info: row.nome },
+                                { title: 'EMAIL', info: row.email },
+                                { title: 'WEBSITE', info: row.site },
+                                { title: 'ENDEREÇO', info: row.endereco + ',' + row.numero + '-' + row.bairro + '-' + row.cidade + '-' + row.estado+'-'+row.cep },
+                                { title: 'FONE', info: row.fone }
+                            ],
+                            dbdata: {
+                                nome: row.nome,
+                                email: row.email,
+                                endereco: row.endereco,
+                                estado: row.estado,
+                                cidade: row.cidade,
+                                bairro: row.bairro,
+                                site: row.site,
+                                numero: row.numero,
+                                complemento: row.complemento,
+                                fone: row.fone,
+                                cep: row.cep
+                            }
+                        });
+                    });
+                    console.log(mn);
+                }
             });
     }
 
-    getCertDados(idcert) {
+    getCertDados(menuitem) {
         let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers: any = new Headers({ 'Content-Type': type }),
             options: any = new RequestOptions({ headers: headers }),
-            url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=certdados&idcert="+idcert;
-        let obs = this.http.get(url, options);
-
-        obs.map(res => res.json())
+            url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=certdados&idcert="+menuitem.tipo;       
+        this.http.get(url, options).map(res => res.json())
             .subscribe((data) => {               
                 if (data[0].nome != "null") {
-                    this.dadosUsuario.nome = data[0].nome;
-                    this.dadosUsuario.email = data[0].email;
-                    this.dadosUsuario.endereco =data[0].endereco;
-                    this.dadosUsuario.estado = data[0].estado;
-                    this.dadosUsuario.cidade = data[0].cidade;
-                    this.dadosUsuario.bairro = data[0].bairro;
-                    this.dadosUsuario.numero = data[0].numero;
-                    this.dadosUsuario.site = data[0].site;
-                    this.dadosUsuario.complemento = data[0].complemento;
-                    this.dadosUsuario.fone = data[0].fone;
-                    this.dadosUsuario.cep = data[0].cep;
+                    menuitem.dbdata.nome = data[0].nome;
+                    menuitem.dbdata.email = data[0].email;
+                    menuitem.dbdata.endereco =data[0].endereco;
+                    menuitem.dbdata.estado = data[0].estado;
+                    menuitem.dbdata.cidade = data[0].cidade;
+                    menuitem.dbdata.bairro = data[0].bairro;
+                    menuitem.dbdata.numero = data[0].numero;
+                    menuitem.dbdata.site = data[0].site;
+                    menuitem.dbdata.complemento = data[0].complemento;
+                    menuitem.dbdata.fone = data[0].fone;
+                    menuitem.dbdata.cep = data[0].cep;
                 }                
             });
     }
@@ -386,8 +405,8 @@ export class TarefaService {
                 this.retdata=data;
                 console.log(this.retdata);
                 if(this.retdata[0].uf!="null"){
-                 this.retdata.forEach(element => {
-                  ceppage.UFList.ufs.push({id:element.id,sigla:element.uf});
+                 this.retdata.forEach(row => {
+                  ceppage.UFList.ufs.push({id:row.id,sigla:row.uf});
                  });
                  //ceppage.UF=ceppage.UFList.ufs[0].sigla;
                  //console.log(ceppage.UF);
@@ -411,9 +430,9 @@ export class TarefaService {
                 this.retdata=data;
                 console.log(this.retdata);
                 if(this.retdata[0].endereco!="null"){
-                 this.retdata.forEach(element => {
-                  ceppage.CEPList.push({endereco: element.endereco,bairro: element.bairro,cidade: element.cidade,
-                      estado: element.uf,cep: element.cep});
+                 this.retdata.forEach(row => {
+                  ceppage.CEPList.push({endereco: row.endereco,bairro: row.bairro,cidade: row.cidade,
+                      estado: row.uf,cep: row.cep});
                  });
                  ceppage.offset+=ceppage.limit;
                  console.log(ceppage.CEPList);

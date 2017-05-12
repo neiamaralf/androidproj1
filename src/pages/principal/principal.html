@@ -7,9 +7,9 @@
         MENU PRINCIPAL
     </ion-list-header>
 
-    <ion-list *ngFor="let item of items" (click)="itemTapped($event, item)">
+    <ion-list *ngFor="let item of items">
 
-        <ion-list-header text-left style="color: black" [color]="item.cor==4? 'cor4': 'cor1'">
+        <ion-list-header text-left style="color: black" [color]="item.cor==4? 'cor4': 'cor1'" (click)="itemTapped($event, item)">
             {{item.title}}
             <span item-right style="color: white">{{
                 item.id==1&&item.show?(ts.dadosUsuario.tipo==0?"USUÁRIO":(ts.dadosUsuario.tipo==1)?"PONTO DE VENDA":(ts.dadosUsuario.tipo==2)?"PRODUTOR":"ADMINISTRADOR"):""
@@ -58,22 +58,19 @@
                 </button>
                 <p color="light" *ngIf="menuitem.tipo==1" item-right>{{menuitem.title}} </p>
 
-                <button *ngIf="item.title!='CERTIFICADORAS'" ion-button color="light" icon-only small item-right clear (click)="showhideclick($event,menuitem)">                 
+                <button ion-button color="light" icon-only small item-right clear (click)="showhideclick($event,item,menuitem)">                 
                  <ion-icon *ngIf="menuitem.showdados" name="arrow-dropdown" item-right></ion-icon>
                  <ion-icon *ngIf="!menuitem.showdados" name="arrow-dropright" item-right></ion-icon>
                 </button>
             </ion-list-header>
-            <ion-list no-lines *ngIf="menuitem.showdados&&item.show&&(item.id==1&&menuitem.tipo==0)" style="background-color: white">
-                <ion-item>NOME: {{ts.dadosUsuario.nome}}</ion-item>
-                <ion-item>EMAIL: {{ts.dadosUsuario.email}}</ion-item>
-                <ion-item text-wrap>ENDEREÇO: {{ts.dadosUsuario.endereco}},{{ts.dadosUsuario.numero}} {{ts.dadosUsuario.cidade}}-{{ts.dadosUsuario.estado}}</ion-item>
-                <ion-item> FONE: {{ts.dadosUsuario.fone}}</ion-item>
+            <ion-list no-lines *ngIf="menuitem.showdados&&item.show" style="background-color: white">
+
+                <ion-item text-wrap *ngFor="let linha of menuitem.linhas"><b>{{linha.title}}</b>: <span *ngIf="linha.title!='WEBSITE'">{{linha.info}}</span><a *ngIf="linha.title=='WEBSITE'" [href]="linha.info">{{linha.info}}</a></ion-item>
             </ion-list>
+
         </ion-list>
     </ion-list>
-    <div *ngIf="selectedItem" padding>
-        You navigated here from <b>{{selectedItem.title}}</b>
-    </div>
+
 </ion-content>
 <ion-footer>
     <page-rodape></page-rodape>

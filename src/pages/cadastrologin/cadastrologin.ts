@@ -12,6 +12,8 @@ export class CadastroPage {
   
   public form: FormGroup;
   public cepform: FormGroup;
+  public menuitem:any;
+  public formvariables:any;
 
   constructor(public modalCtrl: ModalController,public navCtrl: NavController, public tarefaService: TarefaService,  public NP: NavParams, public fb: FormBuilder,public alertCtrl: AlertController) {
     this.tarefaService.tabela = NP.get('tabela');
@@ -40,6 +42,7 @@ export class CadastroPage {
     this.cepform = fb.group({
       "cep": ["", Validators.required]
     });
+    this.formvariables=NP.get('formvariables');;
     this.tarefaService.isEdited = NP.get('edit');
     
     if(this.tarefaService.isEdited)this.form.controls["tipo"].disable(true);
@@ -47,7 +50,7 @@ export class CadastroPage {
     
     if(this.tarefaService.tabela=="certificadoras"){
       if(this.tarefaService.isEdited)
-       tarefaService.getCertDados(NP.get('idcert'));
+       this.tarefaService.tabela;//this.menuitem=NP.get('certdados');
       else
        tarefaService.resetFields();
     }
@@ -75,7 +78,7 @@ export class CadastroPage {
       if(this.tarefaService.tabela=="usuarios"){
          this.tarefaService.storage.ready().then(() => {
             this.tarefaService.storage.get('userid').then((userid) => {
-                this.tarefaService.updateEntry(userid);
+                this.tarefaService.updateEntry(userid,);
             });
 
         });
