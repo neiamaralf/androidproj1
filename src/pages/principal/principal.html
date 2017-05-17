@@ -14,7 +14,6 @@
             <span item-right style="color: white">{{
                 item.id==1&&item.show?(ts.dadosUsuario.tipo==0?"USUÁRIO":(ts.dadosUsuario.tipo==1)?"PONTO DE VENDA":(ts.dadosUsuario.tipo==2)?"PRODUTOR":"ADMINISTRADOR"):""
                 }}</span>
-
             <button *ngIf="item.title=='CERTIFICADORAS'" ion-button color="light" icon-only item-right clear (click)="novacert($event,item)">                 
                   <ion-icon  name="add-circle" item-right></ion-icon>
                 </button>
@@ -65,10 +64,26 @@
             </ion-list-header>
             <ion-list no-lines *ngIf="menuitem.showdados&&item.show" style="background-color: white">
 
-                <ion-item text-wrap *ngFor="let linha of menuitem.linhas"><b>{{linha.title}}</b>: <span *ngIf="linha.title!='WEBSITE'">{{linha.info}}</span><a *ngIf="linha.title=='WEBSITE'" [href]="linha.info">{{linha.info}}</a></ion-item>
+                <ion-item text-wrap *ngFor="let linha of menuitem.linhas">
+                    <b>{{linha.title}}</b>: <span style="user-select:text" *ngIf="linha.title!='WEBSITE'&&linha.title!='EMAIL'">{{linha.info}}</span>
+                    <a *ngIf="linha.title=='WEBSITE'" [href]="linha.info">{{linha.info}}</a>
+                    <a *ngIf="linha.title=='EMAIL'" [href]="'mailto:'+linha.info">{{linha.info}}</a>
+                    <img src="{{pathForImage(lastImage)}}" style="width: 100%" [hidden]="lastImage === null">
+                    <h3 [hidden]="lastImage !== null">Please Select Image!</h3>
+                    <ion-buttons>
+                        <button ion-button icon-left (click)="presentActionSheet()">
+        <ion-icon name="camera"></ion-icon>Select Image
+      </button>
+                        <button ion-button icon-left (click)="uploadImage()" [disabled]="lastImage === null">
+        <ion-icon name="cloud-upload"></ion-icon>Upload
+      </button>
+                    </ion-buttons>
+                </ion-item>
             </ion-list>
-
         </ion-list>
+        <ion-infinite-scroll *ngIf="item.id==9&&item.show" (ionInfinite)="$event.waitFor(populateListProd())">
+            <ion-infinite-scroll-content></ion-infinite-scroll-content>
+        </ion-infinite-scroll>
     </ion-list>
 
 </ion-content>

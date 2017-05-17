@@ -140,7 +140,7 @@ export class TarefaService {
             });
     }
 
-    updateEntry(userid,formvariables) {
+    updateEntry(userid,formvariables,menuitem) {
         let body: string =
             "key=update&username=" + formvariables.nome +
             "&recordID=" + userid +
@@ -163,10 +163,14 @@ export class TarefaService {
             url: any = this.baseURI + "manage-data.php";
 
         this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
-            if (this.tabela == "usuarios") {
+            if (this.tabela == "usuarios") {                
                 if (data[0].id != "") {
                     this.setstorage(data[0]);
                     this.sendNotification(`Cadastro atualizado com sucesso`);
+                     menuitem.linhas[0].info= data[0].nome;
+                     menuitem.linhas[1].info= data[0].email;
+                     menuitem.linhas[2].info=  data[0].endereco + ',' +  data[0].numero + '-' +  data[0].bairro + '-' +  data[0].cidade + '-' +  data[0].estado+'-'+ data[0].cep;
+                     menuitem.linhas[3].info=data[0].fone;                               
                 }
                 else {
                     this.getUDfromstorage();
@@ -178,8 +182,10 @@ export class TarefaService {
             }
             else if (this.tabela == "certificadoras") {
                 this.getUDfromstorage();
-                if(data.update=="ok")
+                if(data.update=="ok"){
                  this.sendNotification(`Cerfificadora atualizada com sucesso.`);
+                
+                }
             }
         });
     }
@@ -323,8 +329,40 @@ export class TarefaService {
             });
     }
 
-    
-       public retdata=[];
+
+    public retdata = [];
+
+    getProdList(page: any, mn: any,categoria:any) {
+        let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+            headers: any = new Headers({ 'Content-Type': type }),
+            options: any = new RequestOptions({ headers: headers }),
+            url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=prodlist&categoria=" +
+                categoria +"&offset=" + page.offset + "&limit=" + page.limit;
+        this.http.get(url, options).map(res => res.json())
+            .subscribe((data) => {
+                if (data[0].nome != "null") {
+                    //mn.menuitems = [];
+                    data.forEach(row => {
+                       mn.menuitems.push({
+                            title: row.nome, tipo: row.id, showdados: false, linhas: [
+                                { title: 'NOME', info: row.nome },
+                                { title: 'MARCA', info: row.marca },
+                                { title: 'CATEGORIA', info: row.categoria },
+                                { title: 'IMAGEM', info: row.imagem }
+                            ],
+                            dbdata: {
+                                nome: row.nome,
+                                idmarca: row.idmarca,
+                                idcategoria: row.idcategoria,
+                                imagem: row.imagem
+                            }
+                        });
+                    });
+                    page.offset += page.limit;
+                }
+                else page.cansearchProd = false;
+            });
+    }
 
     getCertList(mn:any) {
         let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
@@ -333,13 +371,9 @@ export class TarefaService {
             url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=cert";
         this.http.get(url, options).map(res => res.json())
             .subscribe((data) => {
-                console.log(data);
                 mn.menuitems=[];
-                this.retdata=data;
-                console.log(this.retdata);
-                if (this.retdata[0].nome != "null") {
-                    this.retdata.forEach(row => {
-
+                if (data[0].nome != "null") {
+                    data.forEach(row => {
                         mn.menuitems.push({
                             title: row.nome, tipo: row.id, showdados: false, linhas: [
                                 { title: 'NOME', info: row.nome },
@@ -363,7 +397,6 @@ export class TarefaService {
                             }
                         });
                     });
-                    console.log(mn);
                 }
             });
     }
@@ -402,10 +435,8 @@ export class TarefaService {
             .subscribe((data) => {
                 console.log(data);
                 ceppage.UFList.ufs=[];
-                this.retdata=data;
-                console.log(this.retdata);
-                if(this.retdata[0].uf!="null"){
-                 this.retdata.forEach(row => {
+                if(data[0].uf!="null"){
+                 data.forEach(row => {
                   ceppage.UFList.ufs.push({id:row.id,sigla:row.uf});
                  });
                  //ceppage.UF=ceppage.UFList.ufs[0].sigla;
@@ -421,16 +452,12 @@ export class TarefaService {
             url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=buscacep&uf="+
             ceppage.UF+"&cidade="+ceppage.cidade+"&endereco="+ceppage.endereco
             +"&offset="+ceppage.offset+"&limit="+ceppage.limit;
-        
-
         this.http.get(url, options).map(res => res.json())
             .subscribe((data) => {
                 console.log(data);
                 //ceppage.CEPList=[];
-                this.retdata=data;
-                console.log(this.retdata);
-                if(this.retdata[0].endereco!="null"){
-                 this.retdata.forEach(row => {
+                if(data[0].endereco!="null"){
+                 data.forEach(row => {
                   ceppage.CEPList.push({endereco: row.endereco,bairro: row.bairro,cidade: row.cidade,
                       estado: row.uf,cep: row.cep});
                  });
@@ -440,6 +467,8 @@ export class TarefaService {
                 else ceppage.cansearchCEP=false  ;            
             });
     }
+
+   
 
     logout() {
         this.storage.ready().then(() => {
@@ -496,6 +525,7 @@ export class TarefaService {
         this.dadosUsuario.fone =jsonresult. fone;
         this.dadosUsuario.cep = jsonresult.cep;
         this.dadosUsuario.tipo = jsonresult.tipo;
+        
     }
 
     getUDfromstorage() {

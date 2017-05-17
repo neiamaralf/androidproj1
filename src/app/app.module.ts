@@ -4,7 +4,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { BioatestApp } from './app.component';
 import { HomePage } from '../pages/home/home';
-import { BuscaCEPPage } from '../pages/buscacep/pages';
+import { BuscaCEPPage } from '../pages/buscacep/buscacep';
 import { Principal } from '../pages/principal/principal';
 import { Page3 } from '../pages/page3/page3';
 import { newNavbar} from '../pages/cabecalho/cabecalho';
@@ -13,6 +13,10 @@ import { TarefaService} from '../services/json.server';
 import { CadastroPage } from '../pages/cadastrologin/cadastrologin';
 import {TextToSpeech} from '@ionic-native/text-to-speech';
 import { SpeechRecognition } from '@ionic-native/speech-recognition';
+import { File } from '@ionic-native/file';
+import { Transfer } from '@ionic-native/transfer';
+import { FilePath } from '@ionic-native/file-path';
+import { Camera } from '@ionic-native/camera';
 @NgModule({
   declarations: [
     BioatestApp,
@@ -38,6 +42,18 @@ import { SpeechRecognition } from '@ionic-native/speech-recognition';
     CadastroPage,
     BuscaCEPPage
   ],
-  providers: [SpeechRecognition,TextToSpeech,StatusBar,SplashScreen,newNavbar,Rodape,TarefaService,{provide: ErrorHandler, useClass: IonicErrorHandler}]
+  providers: [
+    SpeechRecognition,
+    TextToSpeech,
+    StatusBar,
+    SplashScreen,
+    newNavbar,
+    Rodape,
+    File,
+    Transfer,
+    Camera,
+    FilePath,
+    TarefaService,
+    {provide: ErrorHandler, useClass: IonicErrorHandler}]
 })
 export class AppModule {}

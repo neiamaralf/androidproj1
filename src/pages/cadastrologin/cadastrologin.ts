@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ModalController,AlertController,NavController, NavParams } from 'ionic-angular';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { TarefaService } from '../../services/json.server';
-import { BuscaCEPPage } from '../../pages/buscacep/pages';
+import { BuscaCEPPage } from '../../pages/buscacep/buscacep';
 import { Principal } from '../../pages/principal/principal';
 @Component({
   selector: 'page-cadastrologin',
@@ -14,6 +14,7 @@ export class CadastroPage {
   public cepform: FormGroup;
   public menuitem:any;
   public formvariables:any;
+  public item:any;
 
   constructor(public modalCtrl: ModalController,public navCtrl: NavController, public tarefaService: TarefaService,  public NP: NavParams, public fb: FormBuilder,public alertCtrl: AlertController) {
     this.tarefaService.tabela = NP.get('tabela');
@@ -42,20 +43,16 @@ export class CadastroPage {
     this.cepform = fb.group({
       "cep": ["", Validators.required]
     });
-    this.formvariables=NP.get('formvariables');;
+    this.formvariables=NP.get('formvariables');
     this.tarefaService.isEdited = NP.get('edit');
     
     if(this.tarefaService.isEdited)this.form.controls["tipo"].disable(true);
     this.tarefaService.mostraCep = NP.get('getcep');
     
-    if(this.tarefaService.tabela=="certificadoras"){
-      if(this.tarefaService.isEdited)
-       this.tarefaService.tabela;//this.menuitem=NP.get('certdados');
-      else
-       tarefaService.resetFields();
-    }
-    else
-    tarefaService.getUDfromstorage();
+    if (this.tarefaService.isEdited)
+      this.menuitem = NP.get('menuitem');
+    if (this.tarefaService.tabela == "certificadoras")
+      this.item = NP.get('item');
   }
 
   showcep(){
@@ -78,13 +75,13 @@ export class CadastroPage {
       if(this.tarefaService.tabela=="usuarios"){
          this.tarefaService.storage.ready().then(() => {
             this.tarefaService.storage.get('userid').then((userid) => {
-                this.tarefaService.updateEntry(userid,this.formvariables);
+                this.tarefaService.updateEntry(userid,this.formvariables,this.menuitem);
             });
 
         });
       }
       else  if(this.tarefaService.tabela=="certificadoras"){
-        this.tarefaService.updateEntry(this.NP.get('idcert'),this.formvariables);
+        this.tarefaService.updateEntry(this.NP.get('idcert'),this.formvariables,this.menuitem);
       }
       
       this.navCtrl.pop();

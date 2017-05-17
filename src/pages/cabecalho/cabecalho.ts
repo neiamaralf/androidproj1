@@ -11,14 +11,11 @@ import { Principal } from '../../pages/principal/principal';
   templateUrl: 'cabecalho.html'
 })
 export class newNavbar {
-
   @ViewChild('sb') _searchbar: Searchbar;
 
-  constructor( public navCtrl: NavController,  public tarefaService: TarefaService) {
-    if(!tarefaService.logged)
-       tarefaService.assertlogin(navCtrl,Principal);
-    
-    
+  constructor(public navCtrl: NavController, public tarefaService: TarefaService) {
+    if (!tarefaService.logged)
+      tarefaService.assertlogin(navCtrl, Principal);
   }
 
   soundOnOff(event) {
@@ -37,33 +34,30 @@ export class newNavbar {
       setTimeout(() => {
         this._searchbar.setFocus();
       }, 150);
-
   }
 
   logout() {
     this.tarefaService.logout();
-   // if(this.navCtrl.parent!=null this.navCtrl.getByIndex)
-     //this.navCtrl.popToRoot();
-     if(this.navCtrl.first()!=this.navCtrl.getActive())
+    // if(this.navCtrl.parent!=null this.navCtrl.getByIndex)
+    //this.navCtrl.popToRoot();
+    if (this.navCtrl.first() != this.navCtrl.getActive())
       this.navCtrl.popTo(this.navCtrl.first());
     //this.navCtrl.push(HomePage);
-  }  
+  }
 
   login() {
-    this.tarefaService.loginprompt(this.navCtrl,Principal);   
-    
-     
+    this.tarefaService.loginprompt(this.navCtrl, Principal);
   }
 
   cadastrar(event) {
     this.navCtrl.push(CadastroPage, {
-      edit: false,getcep:true,tabela:"usuarios"
+      edit: false, getcep: true, tabela: "usuarios"
     });
   }
 
   editar(event) {
     this.navCtrl.push(CadastroPage, {
-      edit: true,getcep:false,tabela:"usuarios"
+      edit: true, getcep: false, tabela: "usuarios"
     });
     //  if(this.navCtrl.getActive())
     // console.log(this.navCtrl.getActive().pageRef().nativeElement.localName);
