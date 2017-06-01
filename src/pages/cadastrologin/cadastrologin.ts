@@ -15,14 +15,20 @@ export class CadastroPage {
   public menuitem:any;
   public formvariables:any;
   public item:any;
+  public principal:any;
+  public pageTitle:any="";
 
   constructor(public modalCtrl: ModalController,public navCtrl: NavController, public tarefaService: TarefaService,  public NP: NavParams, public fb: FormBuilder,public alertCtrl: AlertController) {
     this.tarefaService.tabela = NP.get('tabela');
+    this.pageTitle=NP.get('pageTitle');
+    this.principal=NP.get('principal');
     let validatorok:boolean=this.tarefaService.tabela=="usuario";
     this.form = fb.group({
       "name": ["", Validators.required],
       "fala": ["", Validators.nullValidator],
       "tipo": ["0", Validators.required],
+      "idmarca": ["0", Validators.required],
+      "idcategoria": ["22", Validators.required],
       "endereco": ["", Validators.required],
       "numero": ["", Validators.required],
       "bairro": ["", Validators.required],
@@ -40,6 +46,16 @@ export class CadastroPage {
     this.form.controls["cidade"].disable(true);
     this.form.controls["estado"].disable(true);
     this.form.controls["cep"].disable(true);
+    if(this.tarefaService.tabela=='produtos'){
+      this.form.controls["tipo"].disable(true);
+      this.form.controls["fone"].disable(true);
+      this.form.controls["email"].disable(true);
+      this.form.controls["numero"].disable(true);
+    }
+    else{
+      this.form.controls["idmarca"].disable(true);
+      this.form.controls["idcategoria"].disable(true);
+    }
     this.cepform = fb.group({
       "cep": ["", Validators.required]
     });
@@ -49,9 +65,9 @@ export class CadastroPage {
     if(this.tarefaService.isEdited)this.form.controls["tipo"].disable(true);
     this.tarefaService.mostraCep = NP.get('getcep');
     
-    if (this.tarefaService.isEdited)
+   // if (this.tarefaService.isEdited)
       this.menuitem = NP.get('menuitem');
-    if (this.tarefaService.tabela == "certificadoras")
+    
       this.item = NP.get('item');
   }
 
@@ -75,32 +91,32 @@ export class CadastroPage {
       if(this.tarefaService.tabela=="usuarios"){
          this.tarefaService.storage.ready().then(() => {
             this.tarefaService.storage.get('userid').then((userid) => {
-                this.tarefaService.updateEntry(userid,this.formvariables,this.menuitem);
+                this.tarefaService.updateEntry(this.principal,this.item,userid,this.formvariables,this.menuitem);
             });
 
         });
       }
       else  if(this.tarefaService.tabela=="certificadoras"){
-        this.tarefaService.updateEntry(this.NP.get('idcert'),this.formvariables,this.menuitem);
+        this.tarefaService.updateEntry(this.principal,this.item,this.NP.get('idcert'),this.formvariables,this.menuitem);
       }
       
       this.navCtrl.pop();
     }
     else
-      this.tarefaService.createEntry(this.navCtrl,Principal,this.formvariables);
+      this.tarefaService.createEntry(this.principal,this.item,this.navCtrl,Principal,this.formvariables);
     
   } 
 
    deleteEntry() {
      this.tarefaService.storage.ready().then(() => {
        this.tarefaService.storage.get('userid').then((userid) => {
-         this.tarefaService.deleteEntry(userid,this.formvariables);
+         this.tarefaService.deleteEntry(this.principal,this.item,userid,this.formvariables);
          this.navCtrl.pop();
        });
      });
    } 
 
-  back() {
+  dismiss() {
     this.tarefaService.getUDfromstorage();
     this.tarefaService.hideForm=false;
     this.navCtrl.pop();

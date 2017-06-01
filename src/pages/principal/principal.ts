@@ -1,5 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController, Platform, NavParams, Content, ActionSheetController, ToastController, LoadingController, Loading } from 'ionic-angular';
+import {
+  ModalController, AlertController, NavController, Platform, NavParams, Content,
+  ActionSheetController, ToastController, LoadingController, Loading
+} from 'ionic-angular';
 import { DadosUsuario, TarefaService } from '../../services/json.server';
 import { CadastroPage } from '../../pages/cadastrologin/cadastrologin';
 
@@ -29,6 +32,7 @@ export class Principal {
         imagem?: string
       }>,
       dbdata?: {
+        id?: any,
         nome?: string,
         email?: string,
         endereco?: string,
@@ -53,7 +57,10 @@ export class Principal {
   limit: number = 10;
   offset: number = 0;
   cansearchProd: boolean = false;
-  constructor(public platform: Platform, public navCtrl: NavController, public ts: TarefaService, public navParams: NavParams, private camera: Camera, private transfer: Transfer, private file: File, private filePath: FilePath, public actionSheetCtrl: ActionSheetController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) {
+  constructor(public platform: Platform, public navCtrl: NavController, public ts: TarefaService, public navParams: NavParams,
+    public modalCtrl: ModalController, private camera: Camera,
+    private transfer: Transfer, private file: File, private filePath: FilePath, public actionSheetCtrl: ActionSheetController,
+    public toastCtrl: ToastController, public loadingCtrl: LoadingController, public alertCtrl: AlertController) {
     setTimeout(() => {
       ts.getUDfromstorage();
 
@@ -80,11 +87,16 @@ export class Principal {
       this.items.push({ cor: 4, title: 'PREMIUM', id: 6, show: false, menuitems: [] });
       this.items.push({ cor: 1, title: 'PROMOÇÕES DE HOJE', id: 7, show: false, menuitems: [] });
       if (ts.dadosUsuario.tipo == "3") {
-        this.items.push({ cor: 4, title: 'CERTIFICADORAS', id: 8, show: false, menuitems: [] });
-        ts.getCertList(this.items[7]);
+         this.items.push({ cor: 4, title: 'CERTIFICADORAS', id: 8, show: false, menuitems: [] });
+         ts.getCertList(this.items[7]);
+         this.items.push({ cor: 4, title: 'CATEGORIAS', id: 9, show: false, menuitems: [] });
+         ts.getCategoriasList(this.items[8]);
+         this.items.push({ cor: 4, title: 'MARCAS', id: 10, show: false, menuitems: [] });
+         ts.getMarcasList(this.items[9]);
 
-        this.items.push({ cor: 4, title: 'PRODUTOS', id: 9, show: false, menuitems: [] });
-        //ts.getProdList(this,this.items[8],"*"); 
+        this.items.push({ cor: 4, title: 'PRODUTOS', id: 11, show: false, menuitems: [] });
+
+        //ts.getProdList(this,this.items[10],"*"); 
 
       }
       setTimeout(() => { this.cont.resize(); }, 500);
@@ -92,87 +104,96 @@ export class Principal {
   }
 
 
-  public uploadImage() {
-    // Destination URL
+  public uploadImage(menuitem, linha) {
     var url = "http://www.athena3d.com.br/bioatest/uploadimage.php";
-
-    // File for Upload
-    var targetPath = this.pathForImage(this.lastImage);
-
-    // File name only
-    var filename = this.lastImage;
-
+    var newfilename = this.createFileName();
+    var targetPath = this.lastImage;
     var options = {
       fileKey: "file",
-      fileName: filename,
+      fileName: newfilename,
       chunkedMode: false,
       mimeType: "multipart/form-data",
-      params: { 'fileName': filename }
+      params: { 'fileName': newfilename, 'idprod': menuitem.dbdata.id }
     };
-
     const fileTransfer: TransferObject = this.transfer.create();
-
     this.loading = this.loadingCtrl.create({
-      content: 'Uploading...',
+      content: 'Enviando foto...',
     });
     this.loading.present();
-
-    // Use the FileTransfer to upload the image
     fileTransfer.upload(targetPath, url, options).then(data => {
       console.log(data);
-      this.loading.dismissAll()
-      this.presentToast('Image succesful uploaded.');
+      this.loading.dismissAll();
+      setTimeout(() => { menuitem.dbdata.imagem = newfilename; linha.info = newfilename }, 500)
+
+      this.presentToast('Imagem enviada com sucesso.');
     }, err => {
-      this.loading.dismissAll()
-      this.presentToast('Error while uploading file.');
+      this.loading.dismissAll();
+      this.presentToast('Erro no envio da imagem.');
     });
   }
 
+  deletaImagem(menuitem, linha) {
+    this.ts.deleteIMG(menuitem, linha);
+  }
 
-  public takePicture(sourceType) {
-    // Create options for the Camera Dialog
+
+  public takePicture(menuitem, sourceType, linha) {
     var options = {
+      allowEdit:true,
       quality: 100,
       sourceType: sourceType,
       saveToPhotoAlbum: false,
-      correctOrientation: true
+      correctOrientation: true,
+      destinationType: this.camera.DestinationType.FILE_URI,
+      targetWidth: 150,
+      targetHeight: 150
     };
 
-    // Get the data of an image
     this.camera.getPicture(options).then((imagePath) => {
-      // Special handling for Android library
-      if (this.platform.is('android') && sourceType === this.camera.PictureSourceType.PHOTOLIBRARY) {
-        this.filePath.resolveNativePath(imagePath)
-          .then(filePath => {
-            let correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
-            let currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
-            this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
-          });
-      } else {
-        var currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
-        var correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
-        this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
+      console.log("imagePath:" + imagePath);
+      let newFileName = this.createFileName();
+      if (!this.platform.is("mobile") || this.platform.is("mobileweb")) {
+        let base64Image = //'data:image/jpeg;base64,' + 
+          imagePath;
+        menuitem.dbdata.imagem = newFileName;
+        this.ts.addImagetoDB("0", "produtos", base64Image, newFileName);
       }
+      else {
+        if (this.platform.is("Win32NT") || this.platform.is("windows")) {
+          cordova.file = {
+            dataDirectory: 'ms-appdata:///local/'
+          }
+        }
+        this.lastImage
+        if (this.platform.is('android') && sourceType === this.camera.PictureSourceType.PHOTOLIBRARY) {
+          this.filePath.resolveNativePath(imagePath)
+            .then(filePath => {
+              let correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
+              let currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
+              this.lastImage = correctPath + currentName;
+              this.deletaImagem(menuitem, linha);
+              this.uploadImage(menuitem, linha);
+            });
+        } else {
+          //console.log("cordova.file.dataDirectory:" + cordova.file.dataDirectory);
+          var currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
+          var correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
+          this.lastImage = correctPath + currentName;
+          this.deletaImagem(menuitem, linha);
+          this.uploadImage(menuitem, linha);
+        }
+      }
+
     }, (err) => {
-      this.presentToast('Error while selecting image.');
+      this.presentToast('Erro ao selecionar imagem.');
     });
   }
 
-  // Create a new name for the image
   private createFileName() {
     var d = new Date(),
       n = d.getTime(),
       newFileName = n + ".jpg";
     return newFileName;
-  }
-
-  // Copy the image to a local folder
-  private copyFileToLocalDir(namePath, currentName, newFileName) {
-    this.file.copyFile(namePath, currentName, cordova.file.dataDirectory, newFileName).then(success => {
-      this.lastImage = newFileName;
-    }, error => {
-      this.presentToast('Error while storing file.');
-    });
   }
 
   private presentToast(text) {
@@ -189,28 +210,28 @@ export class Principal {
     if (img === null) {
       return '';
     } else {
-      return cordova.file.dataDirectory + img;
+      return "http://athena3d.com.br/bioatest/imagens/" + img;
     }
   }
 
-  public presentActionSheet() {
+  public presentActionSheet(menuitem, linha) {
     let actionSheet = this.actionSheetCtrl.create({
-      title: 'Select Image Source',
+      title: 'Selecione a origem da imagem',
       buttons: [
         {
-          text: 'Load from Library',
+          text: 'Carregar arquivo',
           handler: () => {
-            this.takePicture(this.camera.PictureSourceType.PHOTOLIBRARY);
+            this.takePicture(menuitem, this.camera.PictureSourceType.PHOTOLIBRARY, linha);
           }
         },
         {
-          text: 'Use Camera',
+          text: 'Usar Câmera',
           handler: () => {
-            this.takePicture(this.camera.PictureSourceType.CAMERA);
+            this.takePicture(menuitem, this.camera.PictureSourceType.CAMERA, linha);
           }
         },
         {
-          text: 'Cancel',
+          text: 'Cancelar',
           role: 'cancel'
         }
       ]
@@ -223,7 +244,7 @@ export class Principal {
     if (this.cansearchProd) {
       return new Promise((resolve) => {
         setTimeout(() => {
-          this.ts.getProdList(this, this.items[8], "*");
+          this.ts.getProdList(this, this.items[10], "*");
           resolve();
         }, 500);
       });
@@ -240,26 +261,111 @@ export class Principal {
     event.stopPropagation();
   }
 
-  menuitemclick(item, menuitem) {
+  editaNome(insert,item, menuitem) {
+    let alert = this.alertCtrl.create({
+      title: insert?'Inserir '+item.title:'Editar '+item.title,
+      inputs: [
+        {
+          name: 'nome',
+          label:"NOME",
+          placeholder: 'Digite o nome',
+          value:menuitem!=null?menuitem.dbdata.nome:''
+        }       
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: data => {
+          }
+        },
+        {
+          text: 'Salvar',
+          handler: data => {
+            if (data.nome) {
+              this.ts.updateSoumcampo(this,insert,menuitem!=null?menuitem.tipo:-1,"nome",data.nome,item,menuitem);
+            } else {
+              
+              return false;
+            }
+          }
+        }
+      ]
+    });
+    alert.present();
+  }
+
+  menuitemclick(event,item, menuitem) {
     if (item.title == "CERTIFICADORAS") {
-      this.navCtrl.push(CadastroPage, { edit: true, getcep: false, tabela: "certificadoras", idcert: menuitem.tipo, formvariables: menuitem.dbdata, menuitem: menuitem });
+      this.navCtrl.push(CadastroPage, {principal:this, edit: true, getcep: false, tabela: "certificadoras", idcert: menuitem.tipo, formvariables: menuitem.dbdata, item: { title: "certificadora" }, menuitem: menuitem });
     }
     else if (item.title == "MEU BIOATEST") {
       if (menuitem.tipo == 0) {
-        this.navCtrl.push(CadastroPage, { edit: true, getcep: false, tabela: "usuarios", formvariables: this.ts.dadosUsuario, menuitem: menuitem });
+        this.navCtrl.push(CadastroPage, {principal:this, edit: true, getcep: false, tabela: "usuarios", formvariables: this.ts.dadosUsuario, item: { title: "meu cadastro" }, menuitem: menuitem });
       }
     }
+    else
+     this.editaNome(false,item, menuitem); 
+     event.stopPropagation();
   }
 
   novacert(event, item) {
-    this.navCtrl.push(CadastroPage, { edit: false, getcep: true, tabela: "certificadoras", formvariables: new DadosUsuario, item: item });
+    if (item.title == "CERTIFICADORAS" || item.title == 'PRODUTOS') {
+      let proddados = new DadosUsuario;
+      proddados.idcategoria = "22";
+      proddados.idmarca = "0";
+      let modal = this.modalCtrl.create(CadastroPage, {principal:this, edit: false, getcep: item.title == "PRODUTOS" ? false : true, tabela: item.title.toLowerCase(), formvariables: proddados, item: item });
+      modal.present();
+    }
+    else
+     this.editaNome(true,item, null); 
     event.stopPropagation();
   }
 
-  deleteEntry(menuitem) {
-    this.ts.tabela = "certificadoras";
-    this.ts.deleteEntry(menuitem.tipo, menuitem.dbdata);
+  deleteEntry(event, item, menuitem) {
+    this.ts.tabela = item.title.toLowerCase();
+    let alert = this.alertCtrl.create({
+      title: 'Confirmar exclusão',
+      message: 'Tem certeza que quer excluir ' + menuitem.title + '?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+          }
+        },
+        {
+          text: 'Excluir',
+          handler: () => {
+            this.ts.deleteEntry(this,item,menuitem.tipo, menuitem.dbdata);
+          }
+        }
+      ]
+    });
+    alert.present();
+
+
     event.stopPropagation();
+  }
+
+  updatemenuitemslist(item) {
+    if (item.show) {
+      switch (item.id) {
+        case 8:
+          this.ts.getCertList(this.items[7]);
+          break;
+        case 9:
+          this.ts.getCategoriasList(this.items[8]);
+          break;
+        case 10:
+          this.ts.getMarcasList(this.items[9]);
+          break;
+        case 11:
+          this.cansearchProd = true;
+          this.populateListProd();
+          break;
+      }
+    }
   }
 
   itemTapped(event, item) {
@@ -268,23 +374,26 @@ export class Principal {
         data.show = false;
     }
     item.show = !item.show;
-    if (item.show) {
-      if (item.id == 9) {
-        this.cansearchProd = true;
-        this.populateListProd();
-      }
-    }
-    else {
-      if (item.id == 9) {
+    if (!item.show) {    
+      if (item.id == 11) {
         this.cansearchProd = false;
-        this.offset = 0;
-        item.menuitems = [];
+        this.offset = 0;        
       }
+      item.menuitems = [];
     }
+    else 
+      this.updatemenuitemslist(item);        
+   
 
     this.hasabaaberta = item.show;
     if (item.show && item.title == "CERTIFICADORAS") {
       this.ts.getCertList(this.items[7]);
+    }
+    else if (item.show && item.title == "CATEGORIAS") {
+      this.ts.getCategoriasList(this.items[8]);
+    }
+    else if (item.show && item.title == "MARCAS") {
+      this.ts.getMarcasList(this.items[9]);
     }
     event.stopPropagation();
   }

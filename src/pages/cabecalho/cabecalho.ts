@@ -51,7 +51,7 @@ export class newNavbar {
 
   cadastrar(event) {
     this.navCtrl.push(CadastroPage, {
-      edit: false, getcep: true, tabela: "usuarios"
+      edit: false, getcep: true, tabela: "usuarios",item:{title:"cadastro"}, formvariables: this.tarefaService.dadosUsuario
     });
   }
 

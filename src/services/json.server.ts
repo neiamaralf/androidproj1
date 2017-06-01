@@ -16,12 +16,15 @@ export class DadosUsuario {
     public bairro: string = "";
     public password: string = "";
     public password2: string = "";
-    public site:string="";
+    public site: string = "";
     public numero: any;
     public complemento: string = " ";
     public fone: string = "";
     public cep: string = "";
     public tipo: string = "0";
+    public idmarca?: any;
+    public idcategoria?: any;
+    public imagem?: string
 }
 
 @Injectable()
@@ -96,7 +99,7 @@ export class TarefaService {
         });
     }
 
-    createEntry(nav:any,page:any,formvariables) {
+    createEntry(principal,item,nav:any,page:any,formvariables) {
         let body: string =
             "key=create&name=" + formvariables.nome +
             "&password=" + formvariables.password +
@@ -111,6 +114,8 @@ export class TarefaService {
             "&cep=" + formvariables.cep +
             "&tipo=" + formvariables.tipo +
             "&site=" + formvariables.site +
+            "&idmarca=" + formvariables.idmarca +
+            "&idcategoria=" + formvariables.idcategoria +
             "&tabela=" + this.tabela,
             type: string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers: any = new Headers({ 'Content-Type': type }),
@@ -125,9 +130,14 @@ export class TarefaService {
                         this.dologin(formvariables.email, formvariables.password, false, nav, page);
                         this.sendNotification(`O usuário: ${name} foi cadastrado com sucesso!`);
                     }
-                    else if (this.tabela == "certificadoras"){
+                    else if (this.tabela == "certificadoras") {
                         this.sendNotification(`A certificadora ${name} foi cadastrada com sucesso!`);
-                         
+                        principal.updatemenuitemslist(item);
+                        nav.pop();
+                    }
+                    else if (this.tabela == "produtos") {
+                        this.sendNotification(`O produto ${name} foi inserido com sucesso!`);
+                        principal.updatemenuitemslist(item);
                         nav.pop();
                     }
                 }
@@ -140,7 +150,40 @@ export class TarefaService {
             });
     }
 
-    updateEntry(userid,formvariables,menuitem) {
+    updateSoumcampo(principal,insert:boolean,recordid,nomecampo,novovalor,item,menuitem) {
+        var key:string;
+        var tabela:string=item.title.toLowerCase();
+        if(insert)
+         key="insertum";
+        else
+         key="updateum";
+        let body: string =
+            "key="+key+
+            "&campo=" + nomecampo +
+            "&tabela=" + tabela +
+            "&recordid=" + recordid +
+            "&valor=" + novovalor,
+            type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+            headers: any = new Headers({ 'Content-Type': type }),
+            options: any = new RequestOptions({ headers: headers }),
+            url: any = this.baseURI + "manage-data.php";
+
+        this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+            if (data.update == "ok") {
+                this.sendNotification('tabela '+tabela+' atualizada com sucesso.');
+                principal.updatemenuitemslist(item);  
+                if (menuitem != null) {
+                    menuitem.title = novovalor;
+                    menuitem.linhas[0].info = novovalor;
+                    menuitem.dbdata.nome = novovalor;
+                }
+            }
+
+        });
+    }
+
+
+    updateEntry(principal,item,userid,formvariables,menuitem) {
         let body: string =
             "key=update&username=" + formvariables.nome +
             "&recordID=" + userid +
@@ -156,6 +199,8 @@ export class TarefaService {
             "&fone=" + formvariables.fone +
             "&cep=" + formvariables.cep +
             "&tipo=" + formvariables.tipo +
+            "&idmarca=" + formvariables.idmarca +
+            "&idcategoria=" + formvariables.idcategoria +
             "&tabela=" + this.tabela,
             type: string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers: any = new Headers({ 'Content-Type': type }),
@@ -190,7 +235,7 @@ export class TarefaService {
         });
     }
 
-    deleteEntry(userid,formvariables) {            
+    deleteEntry(principal,item,userid,formvariables) {            
         let name: string = formvariables.nome,
             body: string = "key=delete&recordID=" + userid +
                 "&tabela=" + this.tabela,
@@ -208,13 +253,14 @@ export class TarefaService {
                 else if (this.tabela == "certificadoras") {
                     this.sendNotification(`A certificadora ${name} foi excluída do sistema`);
                 }
+                //if(this.offset>=limit )
+                principal.updatemenuitemslist(item);
             }
             else {
                 this.sendNotification('Algo deu errado! Tente novamente.');
             }
         });
     }
-
 
     pesquisaCep(formvariables) {
         let body: string = "key=buscacep&cep=" + formvariables.cep,
@@ -330,8 +376,6 @@ export class TarefaService {
     }
 
 
-    public retdata = [];
-
     getProdList(page: any, mn: any,categoria:any) {
         let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers: any = new Headers({ 'Content-Type': type }),
@@ -351,6 +395,7 @@ export class TarefaService {
                                 { title: 'IMAGEM', info: row.imagem }
                             ],
                             dbdata: {
+                                id:row.id,
                                 nome: row.nome,
                                 idmarca: row.idmarca,
                                 idcategoria: row.idcategoria,
@@ -362,6 +407,44 @@ export class TarefaService {
                 }
                 else page.cansearchProd = false;
             });
+    }
+
+    addImagetoDB(id,tabela,imgdata,fnome) {            
+        let body: string = "key=salvaimagem&recordID=" + id +
+                "&tabela=" + tabela+"&imgdata="+imgdata+"&fnome="+fnome,
+            type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+            headers: any = new Headers({ 'Content-Type': type }),
+            options: any = new RequestOptions({ headers: headers }),
+            url: any = this.baseURI + "manage-data.php";
+
+        this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+            if (data.insert === "ok") {
+                this.sendNotification(`Imagem enviada com sucesso!`);
+            }
+            else {
+                this.sendNotification('Algo deu errado! Tente novamente.');
+            }
+        });
+    }
+
+
+    deleteIMG(menuitem,linha) {            
+        let body: string = "key=deleteimg&prodid=" + menuitem.dbdata.id +"&imagem=" + menuitem.dbdata.imagem ,
+            type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+            headers: any = new Headers({ 'Content-Type': type }),
+            options: any = new RequestOptions({ headers: headers }),
+            url: any = this.baseURI + "manage-data.php";
+
+        this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+            if (data.delete === "ok") {
+                menuitem.dbdata.imagem=null;
+                linha.info="Por Favor selecione uma imagem!";
+                    this.sendNotification(`A imagem foi excluída do sistema`);               
+            }
+            else {
+                this.sendNotification('Algo deu errado! Tente novamente.');
+            }
+        });
     }
 
     getCertList(mn:any) {
@@ -394,6 +477,52 @@ export class TarefaService {
                                 complemento: row.complemento,
                                 fone: row.fone,
                                 cep: row.cep
+                            }
+                        });
+                    });
+                }
+            });
+    }
+
+    getCategoriasList(mn:any) {
+        let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+            headers: any = new Headers({ 'Content-Type': type }),
+            options: any = new RequestOptions({ headers: headers }),
+            url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=categ";
+        this.http.get(url, options).map(res => res.json())
+            .subscribe((data) => {
+                mn.menuitems=[];
+                if (data[0].nome != "null") {
+                    data.forEach(row => {
+                        mn.menuitems.push({
+                            title: row.nome, tipo: row.id, showdados: false, linhas: [
+                                { title: 'NOME', info: row.nome }
+                            ],
+                            dbdata: {
+                                nome: row.nome
+                            }
+                        });
+                    });
+                }
+            });
+    }
+
+     getMarcasList(mn:any) {
+        let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+            headers: any = new Headers({ 'Content-Type': type }),
+            options: any = new RequestOptions({ headers: headers }),
+            url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=marcas";
+        this.http.get(url, options).map(res => res.json())
+            .subscribe((data) => {
+                mn.menuitems=[];
+                if (data[0].nome != "null") {
+                    data.forEach(row => {
+                        mn.menuitems.push({
+                            title: row.nome, tipo: row.id, showdados: false, linhas: [
+                                { title: 'NOME', info: row.nome }
+                            ],
+                            dbdata: {
+                                nome: row.nome
                             }
                         });
                     });

@@ -17,6 +17,7 @@
   <preference name="SplashScreenDelay" value="3000"/>
   <preference name="android-targetSdkVersion" value="15"/>
   <preference name="android-minSdkVersion" value="15"/>
+  <preference name="windows-target-version" value="10.0" />
   <allow-navigation href="http://ionic.local/*"/>
   <allow-navigation href="http://192.168.10.11:8100"/>
   <allow-intent href="http://*/*"/>

@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Nav, Platform } from 'ionic-angular';
+import { Nav, Platform,AlertController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { HomePage } from '../pages/home/home';
@@ -16,7 +16,7 @@ export class BioatestApp {
 
   pages: Array<{title: string, component: any}>;
 
-  constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
+  constructor(public al:AlertController,public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
     this.initializeApp();
     this.pages = [
       { title: 'Início', component: HomePage },
@@ -27,6 +27,13 @@ export class BioatestApp {
 
   initializeApp() {
     this.platform.ready().then(() => {
+      console.log(this.platform.platforms());
+     let alert = this.al.create({
+    title: 'Low battery',
+    subTitle: JSON.stringify(this.platform.platforms()),
+    buttons: ['Dismiss']
+  });
+  alert.present();
       this.statusBar.styleDefault();
       this.splashScreen.hide();
     });
