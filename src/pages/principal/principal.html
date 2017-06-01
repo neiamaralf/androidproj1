@@ -7,7 +7,7 @@
         MENU PRINCIPAL
     </ion-list-header>
 
-    <ion-list *ngFor="let item of items">
+    <ion-list *ngFor="let item of dbdata.items">
 
         <ion-list-header text-left style="color: black" [color]="item.cor==4? 'cor4': 'cor1'" (click)="itemTapped($event, item)">
             {{item.title}}

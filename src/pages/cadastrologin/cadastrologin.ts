@@ -3,7 +3,7 @@ import { ModalController,AlertController,NavController, NavParams } from 'ionic-
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { TarefaService } from '../../services/json.server';
 import { BuscaCEPPage } from '../../pages/buscacep/buscacep';
-import { Principal } from '../../pages/principal/principal';
+import { Principal,DBData } from '../../pages/principal/principal';
 @Component({
   selector: 'page-cadastrologin',
   templateUrl: 'cadastrologin.html'
@@ -17,6 +17,7 @@ export class CadastroPage {
   public item:any;
   public principal:any;
   public pageTitle:any="";
+  public dbdata:DBData=new DBData();
 
   constructor(public modalCtrl: ModalController,public navCtrl: NavController, public tarefaService: TarefaService,  public NP: NavParams, public fb: FormBuilder,public alertCtrl: AlertController) {
     this.tarefaService.tabela = NP.get('tabela');
@@ -64,14 +65,18 @@ export class CadastroPage {
     
     if(this.tarefaService.isEdited)this.form.controls["tipo"].disable(true);
     this.tarefaService.mostraCep = NP.get('getcep');
-    
-   // if (this.tarefaService.isEdited)
-      this.menuitem = NP.get('menuitem');
-    
-      this.item = NP.get('item');
+
+    // if (this.tarefaService.isEdited)
+    this.menuitem = NP.get('menuitem');
+
+    this.item = NP.get('item');
+    this.dbdata.items.push({ cor: 4, title: 'CATEGORIAS', id: 0, show: false, menuitems: [] });
+    tarefaService.getCategoriasList(this.dbdata.items[0]);
+    this.dbdata.items.push({ cor: 4, title: 'MARCAS', id: 10, show: false, menuitems: [] });
+    tarefaService.getMarcasList(this.dbdata.items[1]);
   }
 
-  showcep(){
+  showcep() {
      this.tarefaService.mostraCep =true;
   }
 
@@ -96,7 +101,7 @@ export class CadastroPage {
 
         });
       }
-      else  if(this.tarefaService.tabela=="certificadoras"){
+      else  if(this.tarefaService.tabela=="certificadoras"||this.tarefaService.tabela=="produtos"){
         this.tarefaService.updateEntry(this.principal,this.item,this.NP.get('idcert'),this.formvariables,this.menuitem);
       }
       

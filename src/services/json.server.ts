@@ -137,6 +137,8 @@ export class TarefaService {
                     }
                     else if (this.tabela == "produtos") {
                         this.sendNotification(`O produto ${name} foi inserido com sucesso!`);
+                        principal.offset=0;
+                        item.menuitems = [];
                         principal.updatemenuitemslist(item);
                         nav.pop();
                     }
@@ -182,6 +184,16 @@ export class TarefaService {
         });
     }
 
+    constroiendereco(formvariables){
+     return formvariables.endereco + ',' +
+       formvariables.numero + '-' 
+       +formvariables.complemento + '-' 
+       +  formvariables.bairro + '-' 
+       +formvariables.cidade + '-'
+       +  formvariables.estado+'-'
+       + formvariables.cep;
+    }
+
 
     updateEntry(principal,item,userid,formvariables,menuitem) {
         let body: string =
@@ -214,7 +226,7 @@ export class TarefaService {
                     this.sendNotification(`Cadastro atualizado com sucesso`);
                      menuitem.linhas[0].info= data[0].nome;
                      menuitem.linhas[1].info= data[0].email;
-                     menuitem.linhas[2].info=  data[0].endereco + ',' +  data[0].numero + '-' +  data[0].bairro + '-' +  data[0].cidade + '-' +  data[0].estado+'-'+ data[0].cep;
+                     menuitem.linhas[2].info=  this.constroiendereco(data[0]);
                      menuitem.linhas[3].info=data[0].fone;                               
                 }
                 else {
@@ -227,9 +239,27 @@ export class TarefaService {
             }
             else if (this.tabela == "certificadoras") {
                 this.getUDfromstorage();
-                if(data.update=="ok"){
-                 this.sendNotification(`Cerfificadora atualizada com sucesso.`);
-                
+                if (data.update == "ok") {
+                    this.sendNotification(`Cerfificadora atualizada com sucesso.`);
+
+                    menuitem.title = formvariables.nome;
+                    menuitem.linhas[0].info = formvariables.nome;
+                    menuitem.linhas[1].info=formvariables.email;
+                    menuitem.linhas[2].info=formvariables.site;
+                    menuitem.linhas[3].info= this.constroiendereco(formvariables);
+                    menuitem.linhas[4].info=formvariables.fone;  
+
+                }
+            }
+            else if (this.tabela == "produtos") {
+                this.getUDfromstorage();
+                if (data.update == "ok") {
+                    this.sendNotification(`Produto atualizado com sucesso.`);
+                    menuitem.title = formvariables.nome;
+                    menuitem.linhas[0].info = formvariables.nome;
+                    menuitem.linhas[1].info = data.marca;
+                    menuitem.linhas[2].info = data.categoria;
+
                 }
             }
         });
@@ -250,10 +280,13 @@ export class TarefaService {
                     this.logout();
                     this.sendNotification(`O usuário: ${name} foi excluído do sistema`);
                 }
-                else if (this.tabela == "certificadoras") {
+                else if (this.tabela == "certificadoras")
+                    this.sendNotification(`A certificadora ${name} foi excluída do sistema`);
+                else if (this.tabela == "produtos"){
+                    principal.offset=0;
+                    item.menuitems = [];
                     this.sendNotification(`A certificadora ${name} foi excluída do sistema`);
                 }
-                //if(this.offset>=limit )
                 principal.updatemenuitemslist(item);
             }
             else {
@@ -462,7 +495,7 @@ export class TarefaService {
                                 { title: 'NOME', info: row.nome },
                                 { title: 'EMAIL', info: row.email },
                                 { title: 'WEBSITE', info: row.site },
-                                { title: 'ENDEREÇO', info: row.endereco + ',' + row.numero + '-' + row.bairro + '-' + row.cidade + '-' + row.estado+'-'+row.cep },
+                                { title: 'ENDEREÇO', info: this.constroiendereco(row) },
                                 { title: 'FONE', info: row.fone }
                             ],
                             dbdata: {
@@ -529,30 +562,7 @@ export class TarefaService {
                 }
             });
     }
-
-    getCertDados(menuitem) {
-        let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
-            headers: any = new Headers({ 'Content-Type': type }),
-            options: any = new RequestOptions({ headers: headers }),
-            url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=certdados&idcert="+menuitem.tipo;       
-        this.http.get(url, options).map(res => res.json())
-            .subscribe((data) => {               
-                if (data[0].nome != "null") {
-                    menuitem.dbdata.nome = data[0].nome;
-                    menuitem.dbdata.email = data[0].email;
-                    menuitem.dbdata.endereco =data[0].endereco;
-                    menuitem.dbdata.estado = data[0].estado;
-                    menuitem.dbdata.cidade = data[0].cidade;
-                    menuitem.dbdata.bairro = data[0].bairro;
-                    menuitem.dbdata.numero = data[0].numero;
-                    menuitem.dbdata.site = data[0].site;
-                    menuitem.dbdata.complemento = data[0].complemento;
-                    menuitem.dbdata.fone = data[0].fone;
-                    menuitem.dbdata.cep = data[0].cep;
-                }                
-            });
-    }
-
+    
     getUFList(ceppage:any) {
         let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers: any = new Headers({ 'Content-Type': type }),

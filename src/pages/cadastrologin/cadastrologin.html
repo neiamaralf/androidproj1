@@ -63,7 +63,7 @@
                         </ion-item>
                     </ion-item-group>
                     <ion-item-group>
-                        <ion-item-divider color="light">{{tarefaService.tabela=="certificadoras"?"Nome da certificadora":"Nome de usuário"}} *</ion-item-divider>
+                        <ion-item-divider color="light">{{tarefaService.tabela=="certificadoras"?"Nome da certificadora":((tarefaService.tabela=="produtos")?"Nome do produto":"Nome de usuário")}} *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="text" [placeholder]="tarefaService.tabela=='certificadoras'?'Digite o nome da certificadora...':'Digite o nome de usuário...'" formControlName="name" [(ngModel)]="formvariables.nome"></ion-input>
                         </ion-item>
@@ -72,9 +72,8 @@
                         <ion-item-divider color="light">Marca</ion-item-divider>
                         <ion-item>
                             <ion-select formControlName="idmarca" [(ngModel)]="formvariables.idmarca">
-                                <ion-option value="0">Cliente</ion-option>
-                                <ion-option value="1">Ponto de Venda</ion-option>
-                                <ion-option value="2">Produtor</ion-option>
+                                <ion-option *ngFor="let menuitem of dbdata.items[1].menuitems" value="{{menuitem.tipo}}">{{menuitem.title}}</ion-option>
+
                             </ion-select>
                         </ion-item>
                     </ion-item-group>
@@ -82,9 +81,8 @@
                         <ion-item-divider color="light">Categoria</ion-item-divider>
                         <ion-item>
                             <ion-select formControlName="idcategoria" [(ngModel)]="formvariables.idcategoria">
-                                <ion-option value="22">Cliente</ion-option>
-                                <ion-option value="1">Ponto de Venda</ion-option>
-                                <ion-option value="2">Produtor</ion-option>
+                                <ion-option *ngFor="let menuitem of dbdata.items[0].menuitems" value="{{menuitem.tipo}}">{{menuitem.title}}</ion-option>
+
                             </ion-select>
                         </ion-item>
                     </ion-item-group>

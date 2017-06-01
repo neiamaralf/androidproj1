@@ -11,18 +11,11 @@ import { Transfer, TransferObject } from '@ionic-native/transfer';
 import { FilePath } from '@ionic-native/file-path';
 import { Camera } from '@ionic-native/camera';
 declare var cordova: any;
-@Component({
-  selector: 'page-principal',
-  templateUrl: 'principal.html'
-})
-export class Principal {
-  lastImage: string = null;
-  loading: Loading;
-  @ViewChild('con1') cont: Content;
-  selectedItem: any;
-  hasabaaberta: boolean = false;
-  menubuttons: string[];
-  items: Array<{
+export class DBData{
+  constructor(){
+    this.items = [];
+  }
+   public items: Array<{
     cor: number, title: string, id: number, show: boolean,
     menuitems: Array<{
       title: string, tipo: number, showdados: boolean,
@@ -53,7 +46,19 @@ export class Principal {
       }
     }>
   }>;
-
+}
+@Component({
+  selector: 'page-principal',
+  templateUrl: 'principal.html'
+})
+export class Principal {
+  lastImage: string = null;
+  loading: Loading;
+  @ViewChild('con1') cont: Content;
+  selectedItem: any;
+  hasabaaberta: boolean = false;
+  menubuttons: string[];
+  dbdata:DBData=new DBData();
   limit: number = 10;
   offset: number = 0;
   cansearchProd: boolean = false;
@@ -65,8 +70,7 @@ export class Principal {
       ts.getUDfromstorage();
 
       this.selectedItem = navParams.get('item');
-      this.items = [];
-      this.items.push({
+      this.dbdata.items.push({
         cor: 4, title: 'MEU BIOATEST', id: 1, show: false,
         menuitems: [
           {
@@ -80,24 +84,20 @@ export class Principal {
           { title: 'MENSAGENS', tipo: 2, showdados: false, linhas: [] },
           { title: 'UPLOADS', tipo: 3, showdados: false, linhas: [] }]
       });
-      this.items.push({ cor: 4, title: 'BUSCAR PRODUTO', id: 2, show: false, menuitems: [] });
-      this.items.push({ cor: 4, title: 'BUSCAR PROPRIEDADE', id: 3, show: false, menuitems: [] });
-      this.items.push({ cor: 4, title: 'BUSCAR PONTO DE VENDA', id: 4, show: false, menuitems: [] });
-      this.items.push({ cor: 4, title: 'CONTEÚDO', id: 5, show: false, menuitems: [] });
-      this.items.push({ cor: 4, title: 'PREMIUM', id: 6, show: false, menuitems: [] });
-      this.items.push({ cor: 1, title: 'PROMOÇÕES DE HOJE', id: 7, show: false, menuitems: [] });
+      this.dbdata.items.push({ cor: 4, title: 'BUSCAR PRODUTO', id: 2, show: false, menuitems: [] });
+      this.dbdata.items.push({ cor: 4, title: 'BUSCAR PROPRIEDADE', id: 3, show: false, menuitems: [] });
+      this.dbdata.items.push({ cor: 4, title: 'BUSCAR PONTO DE VENDA', id: 4, show: false, menuitems: [] });
+      this.dbdata.items.push({ cor: 4, title: 'CONTEÚDO', id: 5, show: false, menuitems: [] });
+      this.dbdata.items.push({ cor: 4, title: 'PREMIUM', id: 6, show: false, menuitems: [] });
+      this.dbdata.items.push({ cor: 1, title: 'PROMOÇÕES DE HOJE', id: 7, show: false, menuitems: [] });
       if (ts.dadosUsuario.tipo == "3") {
-         this.items.push({ cor: 4, title: 'CERTIFICADORAS', id: 8, show: false, menuitems: [] });
-         ts.getCertList(this.items[7]);
-         this.items.push({ cor: 4, title: 'CATEGORIAS', id: 9, show: false, menuitems: [] });
-         ts.getCategoriasList(this.items[8]);
-         this.items.push({ cor: 4, title: 'MARCAS', id: 10, show: false, menuitems: [] });
-         ts.getMarcasList(this.items[9]);
-
-        this.items.push({ cor: 4, title: 'PRODUTOS', id: 11, show: false, menuitems: [] });
-
-        //ts.getProdList(this,this.items[10],"*"); 
-
+         this.dbdata.items.push({ cor: 4, title: 'CERTIFICADORAS', id: 8, show: false, menuitems: [] });
+         ts.getCertList(this.dbdata.items[7]);
+         this.dbdata.items.push({ cor: 4, title: 'CATEGORIAS', id: 9, show: false, menuitems: [] });
+         ts.getCategoriasList(this.dbdata.items[8]);
+         this.dbdata.items.push({ cor: 4, title: 'MARCAS', id: 10, show: false, menuitems: [] });
+         ts.getMarcasList(this.dbdata.items[9]);
+        this.dbdata.items.push({ cor: 4, title: 'PRODUTOS', id: 11, show: false, menuitems: [] });
       }
       setTimeout(() => { this.cont.resize(); }, 500);
     }, 500);
@@ -244,7 +244,7 @@ export class Principal {
     if (this.cansearchProd) {
       return new Promise((resolve) => {
         setTimeout(() => {
-          this.ts.getProdList(this, this.items[10], "*");
+          this.ts.getProdList(this, this.dbdata.items[10], "*");
           resolve();
         }, 500);
       });
@@ -299,6 +299,9 @@ export class Principal {
     if (item.title == "CERTIFICADORAS") {
       this.navCtrl.push(CadastroPage, {principal:this, edit: true, getcep: false, tabela: "certificadoras", idcert: menuitem.tipo, formvariables: menuitem.dbdata, item: { title: "certificadora" }, menuitem: menuitem });
     }
+    else if (item.title == "PRODUTOS") {
+      this.navCtrl.push(CadastroPage, {principal:this, edit: true, getcep: false, tabela: "produtos", idcert: menuitem.tipo, formvariables: menuitem.dbdata, item: { title: "produtos" }, menuitem: menuitem });
+    }
     else if (item.title == "MEU BIOATEST") {
       if (menuitem.tipo == 0) {
         this.navCtrl.push(CadastroPage, {principal:this, edit: true, getcep: false, tabela: "usuarios", formvariables: this.ts.dadosUsuario, item: { title: "meu cadastro" }, menuitem: menuitem });
@@ -352,13 +355,13 @@ export class Principal {
     if (item.show) {
       switch (item.id) {
         case 8:
-          this.ts.getCertList(this.items[7]);
+          this.ts.getCertList(this.dbdata.items[7]);
           break;
         case 9:
-          this.ts.getCategoriasList(this.items[8]);
+          this.ts.getCategoriasList(this.dbdata.items[8]);
           break;
         case 10:
-          this.ts.getMarcasList(this.items[9]);
+          this.ts.getMarcasList(this.dbdata.items[9]);
           break;
         case 11:
           this.cansearchProd = true;
@@ -369,7 +372,7 @@ export class Principal {
   }
 
   itemTapped(event, item) {
-    for (let data of this.items) {
+    for (let data of this.dbdata.items) {
       if (data != item)
         data.show = false;
     }
@@ -387,13 +390,13 @@ export class Principal {
 
     this.hasabaaberta = item.show;
     if (item.show && item.title == "CERTIFICADORAS") {
-      this.ts.getCertList(this.items[7]);
+      this.ts.getCertList(this.dbdata.items[7]);
     }
     else if (item.show && item.title == "CATEGORIAS") {
-      this.ts.getCategoriasList(this.items[8]);
+      this.ts.getCategoriasList(this.dbdata.items[8]);
     }
     else if (item.show && item.title == "MARCAS") {
-      this.ts.getMarcasList(this.items[9]);
+      this.ts.getMarcasList(this.dbdata.items[9]);
     }
     event.stopPropagation();
   }
