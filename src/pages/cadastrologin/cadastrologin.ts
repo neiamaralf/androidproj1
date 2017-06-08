@@ -47,7 +47,7 @@ export class CadastroPage {
     this.form.controls["cidade"].disable(true);
     this.form.controls["estado"].disable(true);
     this.form.controls["cep"].disable(true);
-    if(this.tarefaService.tabela=='produtos'){
+    if(this.tarefaService.tabela=='produtos'||this.tarefaService.tabela=='infousuario'){
       this.form.controls["tipo"].disable(true);
       this.form.controls["fone"].disable(true);
       this.form.controls["email"].disable(true);
@@ -104,7 +104,9 @@ export class CadastroPage {
       else  if(this.tarefaService.tabela=="certificadoras"||this.tarefaService.tabela=="produtos"){
         this.tarefaService.updateEntry(this.principal,this.item,this.NP.get('idcert'),this.formvariables,this.menuitem);
       }
-      
+      else  if(this.tarefaService.tabela=="infousuario"){
+        this.tarefaService.updateInfoUsuario(this.item,this.formvariables.nome);
+      }
       this.navCtrl.pop();
     }
     else

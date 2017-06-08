@@ -194,6 +194,48 @@ export class TarefaService {
        + formvariables.cep;
     }
 
+     getInfoUsuario(historico,valores,missao) {
+          this.storage.ready().then(() => {
+            this.storage.get('userid').then((idusuario) => {
+        let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+            headers: any = new Headers({ 'Content-Type': type }),
+            options: any = new RequestOptions({ headers: headers }),
+            url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=infousuario"+"&idusuario="+idusuario;
+        this.http.get(url, options).map(res => res.json())
+            .subscribe((data) => {
+                if(data[0].id!="null"){
+                 historico.menuitems[0].dbdata.nome=data[0].historico;
+                 valores.menuitems[0].dbdata.nome=data[0].valores;
+                 missao.menuitems[0].dbdata.nome=data[0].missao;
+                } 
+               
+            });
+              });
+
+        });
+    }
+
+
+    updateInfoUsuario(itemlinha,texto){
+        this.storage.ready().then(() => {
+            this.storage.get('userid').then((userid) => {
+                var campo: string;
+                if (itemlinha.title == 'HISTÓRICO') campo="historico";
+                else if (itemlinha.title == 'VALORES') campo="valores";
+                else if (itemlinha.title == 'MISSÃO') campo="missao";
+                let body: string ="key=updateinfousuario" + "&recordID=" + userid +"&campo=" + campo+"&texto=" + texto,
+                    type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+                    headers: any = new Headers({ 'Content-Type': type }),
+                    options: any = new RequestOptions({ headers: headers }),
+                    url: any = this.baseURI + "manage-data.php";
+                    this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+
+                    });
+            });
+
+        });
+    }
+
 
     updateEntry(principal,item,userid,formvariables,menuitem) {
         let body: string =
@@ -285,7 +327,12 @@ export class TarefaService {
                 else if (this.tabela == "produtos"){
                     principal.offset=0;
                     item.menuitems = [];
-                    this.sendNotification(`A certificadora ${name} foi excluída do sistema`);
+                    this.sendNotification(`O produto ${name} foi excluído do sistema`);
+                }
+                else if (this.tabela == "listaprodutos"){
+                    principal.offset=0;
+                    item.menuitems = [];
+                    this.sendNotification(`O produto ${name} foi excluído do sistema`);
                 }
                 principal.updatemenuitemslist(item);
             }
@@ -408,8 +455,78 @@ export class TarefaService {
             });
     }
 
+    insertProdLista(principal,item,menuitems) {
+        let jsonlist: Array<{ idproduto: number, preco: number }> = [];
+        menuitems.forEach(mn => {
+            if (mn.showdados)
+                jsonlist.push({ idproduto: mn.dbdata.id, preco: mn.dbdata.preco })
+        });
+        this.storage.ready().then(() => {
+            this.storage.get('userid').then((idusuario) => {
+                let body: string =
+                    "key=insprodlist" +
+                    "&idusuario=" + idusuario +
+                    "&json=" + JSON.stringify(jsonlist),
+                    type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+                    headers: any = new Headers({ 'Content-Type': type }),
+                    options: any = new RequestOptions({ headers: headers }),
+                    url: any = this.baseURI + "manage-data.php";
+                let obs = this.http.post(url, body, options);
+                obs.map(res => res.json())
+                    .subscribe((data) => {
+                        console.log(data);
+                        if (data.insert === "ok") {
+                            this.sendNotification(jsonlist.length + ' produto(s) inseridos com sucesso!');
+                            principal.offset=0;
+                        principal.dbdata.items[0].menuitems[1].linhas[1].dbdata.items[0].menuitems = [];
+                        principal.updatemenuitemslist(principal.dbdata.items[0].menuitems[1].linhas[1].dbdata.items[0]);
+                        }
+                        else {
+                            this.sendNotification('Algo deu errado! ' + data.insert);
+                        }
+                    });
+            })
+        })
 
-    getProdList(page: any, mn: any,categoria:any) {
+    }
+
+
+    getProdListUsr(page: any, mn: any, categoria: any) {
+        this.storage.ready().then(() => {
+            this.storage.get('userid').then((idusuario) => {
+                let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+                    headers: any = new Headers({ 'Content-Type': type }),
+                    options: any = new RequestOptions({ headers: headers }),
+                    url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=getprodlist&categoria=" +
+                        categoria + "&idusuario=" + idusuario + "&offset=" + page.offset + "&limit=" + page.limit;
+                this.http.get(url, options).map(res => res.json())
+                    .subscribe((data) => {
+                         if(data[0].id!="null"){
+                            data.forEach(row => {
+                                mn.menuitems.push({
+                                    title: row.nome, tipo: row.id, showdados: false, linhas: [],
+                                    dbdata: {
+                                        nome: row.nome,
+                                        id: row.id,
+                                        idproduto: row.idproduto,
+                                        preco: row.preco,
+                                        idmarca: row.idmarca,
+                                        idcategoria: row.idcategoria,
+                                        imagem: row.imagem
+                                    }
+                                });
+                            });
+                           
+                            page.offset += page.limit;
+                        }
+                    });
+            });
+        });
+
+    }
+
+
+    getProdList(page: any, mn: any,categoria:any,_showdados:boolean) {
         let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers: any = new Headers({ 'Content-Type': type }),
             options: any = new RequestOptions({ headers: headers }),
@@ -421,11 +538,11 @@ export class TarefaService {
                     //mn.menuitems = [];
                     data.forEach(row => {
                        mn.menuitems.push({
-                            title: row.nome, tipo: row.id, showdados: false, linhas: [
-                                { title: 'NOME', info: row.nome },
-                                { title: 'MARCA', info: row.marca },
-                                { title: 'CATEGORIA', info: row.categoria },
-                                { title: 'IMAGEM', info: row.imagem }
+                            title: row.nome, tipo: row.id, showdados: _showdados, linhas: [
+                                { title: 'NOME', info: row.nome,dbdata:null  },
+                                { title: 'MARCA', info: row.marca,dbdata:null },
+                                { title: 'CATEGORIA', info: row.categoria,dbdata:null },
+                                { title: 'IMAGEM', info: row.imagem,dbdata:null }
                             ],
                             dbdata: {
                                 id:row.id,
@@ -492,11 +609,11 @@ export class TarefaService {
                     data.forEach(row => {
                         mn.menuitems.push({
                             title: row.nome, tipo: row.id, showdados: false, linhas: [
-                                { title: 'NOME', info: row.nome },
-                                { title: 'EMAIL', info: row.email },
-                                { title: 'WEBSITE', info: row.site },
-                                { title: 'ENDEREÇO', info: this.constroiendereco(row) },
-                                { title: 'FONE', info: row.fone }
+                                { title: 'NOME', info: row.nome,dbdata:null },
+                                { title: 'EMAIL', info: row.email,dbdata:null },
+                                { title: 'WEBSITE', info: row.site,dbdata:null },
+                                { title: 'ENDEREÇO', info: this.constroiendereco(row),dbdata:null },
+                                { title: 'FONE', info: row.fone,dbdata:null }
                             ],
                             dbdata: {
                                 nome: row.nome,
@@ -529,7 +646,7 @@ export class TarefaService {
                     data.forEach(row => {
                         mn.menuitems.push({
                             title: row.nome, tipo: row.id, showdados: false, linhas: [
-                                { title: 'NOME', info: row.nome }
+                                { title: 'NOME', info: row.nome,dbdata:null }
                             ],
                             dbdata: {
                                 nome: row.nome
@@ -552,7 +669,7 @@ export class TarefaService {
                     data.forEach(row => {
                         mn.menuitems.push({
                             title: row.nome, tipo: row.id, showdados: false, linhas: [
-                                { title: 'NOME', info: row.nome }
+                                { title: 'NOME', info: row.nome,dbdata:null }
                             ],
                             dbdata: {
                                 nome: row.nome

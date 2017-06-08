@@ -18,7 +18,7 @@
             <h2>Cadastro realizado com sucesso!</h2>
         </ion-item>
         <ion-item>
-            <button *ngIf="tarefaService.isEdited && !tarefaService.hideForm && tarefaService.tabela!='certificadoras'" ion-button item-right color="danger" icon-only clear (click)="deleteEntry()">
+            <button *ngIf="tarefaService.isEdited && !tarefaService.hideForm && tarefaService.tabela!='certificadoras'&&tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'" ion-button item-right color="danger" icon-only clear (click)="deleteEntry()">
                <ion-icon name="trash" ></ion-icon>
               </button>
         </ion-item>
@@ -62,10 +62,15 @@
                             </ion-select>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group>
-                        <ion-item-divider color="light">{{tarefaService.tabela=="certificadoras"?"Nome da certificadora":((tarefaService.tabela=="produtos")?"Nome do produto":"Nome de usuário")}} *</ion-item-divider>
+                    <ion-item-group *ngIf="tarefaService.tabela!='infousuario'">
+                        <ion-item-divider color=" light">{{tarefaService.tabela=="certificadoras"?"Nome da certificadora ":((tarefaService.tabela=="produtos")?"Nome do produto":"Nome de usuário")}} *</ion-item-divider>
                         <ion-item>
-                            <ion-input ng-value="" type="text" [placeholder]="tarefaService.tabela=='certificadoras'?'Digite o nome da certificadora...':'Digite o nome de usuário...'" formControlName="name" [(ngModel)]="formvariables.nome"></ion-input>
+                            <ion-input ng-value="" type="text" [placeholder]="tarefaService.tabela=='certificadoras' ? 'Digite o nome da certificadora...': 'Digite o nome de usuário...' " formControlName="name" [(ngModel)]="formvariables.nome"></ion-input>
+                        </ion-item>
+                    </ion-item-group>
+                    <ion-item-group *ngIf="tarefaService.tabela=='infousuario'">
+                        <ion-item>
+                            <ion-textarea fz-elastic ng-value="" type="text" placeholder="Digite o texto..." formControlName="name" [(ngModel)]="formvariables.nome"></ion-textarea>
                         </ion-item>
                     </ion-item-group>
                     <ion-item-group *ngIf="tarefaService.tabela=='produtos'">
@@ -77,7 +82,7 @@
                             </ion-select>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group *ngIf="tarefaService.tabela=='produtos'">
+                    <ion-item-group *ngIf="tarefaService.tabela=='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Categoria</ion-item-divider>
                         <ion-item>
                             <ion-select formControlName="idcategoria" [(ngModel)]="formvariables.idcategoria">
@@ -86,7 +91,7 @@
                             </ion-select>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Email *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="email" placeholder="Digite o email..." formControlName="email" [(ngModel)]="formvariables.email"></ion-input>
@@ -98,40 +103,40 @@
                             <ion-input ng-value="" type="url" placeholder="Digite o website..." formControlName="site" [(ngModel)]="formvariables.site"></ion-input>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">CEP</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="text" placeholder="Digite o CEP..." item-left formControlName="cep" [(ngModel)]="formvariables.cep"></ion-input>
                             <button ion-button color="primary" text-center item-right (click)="showcep()">Alterar</button>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Endereço</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="text" placeholder="Digite o endereço completo..." formControlName="endereco" [(ngModel)]="formvariables.endereco"></ion-input>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Número e complemento *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="number" placeholder="Digite o número..." formControlName="numero" [(ngModel)]="formvariables.numero"></ion-input>
                             <ion-input ng-value="" type="text" placeholder="Digite o complemento..." [ngModelOptions]="{standalone: true}" [(ngModel)]="formvariables.complemento"></ion-input>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Bairro</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="text" placeholder="Digite o bairro..." formControlName="bairro" [(ngModel)]="formvariables.bairro"></ion-input>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Fone *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="tel" placeholder="Digite o telefone..." formControlName="fone" [(ngModel)]="formvariables.fone"></ion-input>
                         </ion-item>
                     </ion-item-group>
 
-                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Cidade e Estado</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="text" placeholder="Digite a cidade..." formControlName="cidade" [(ngModel)]="formvariables.cidade"></ion-input>
@@ -139,13 +144,13 @@
                         </ion-item>
                     </ion-item-group>
 
-                    <ion-item-group *ngIf="tarefaService.tabela!='certificadoras'&&tarefaService.tabela!='produtos'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='certificadoras' &&tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Senha *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="password" placeholder="Digite a senha..." formControlName="password" [(ngModel)]="formvariables.password"></ion-input>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group *ngIf="tarefaService.tabela!='certificadoras'&&tarefaService.tabela!='produtos'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='certificadoras' &&tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Confirmação Senha *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="password" placeholder="Digite novamente a senha..." formControlName="password2" [(ngModel)]="formvariables.password2"></ion-input>
@@ -154,7 +159,7 @@
                     <ion-item center>
 
                         <button ion-button color="primary" text-center item-center [disabled]="!form.valid">
-               {{tarefaService.isEdited?"Salvar": "Inserir" }}
+               {{tarefaService.isEdited?"Salvar ": "Inserir " }}
               </button>
                     </ion-item>
                 </ion-list>

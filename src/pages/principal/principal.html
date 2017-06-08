@@ -52,7 +52,7 @@
                 <button *ngIf="item.title=='CERTIFICADORAS'||item.title=='PRODUTOS'||item.title=='CATEGORIAS'||item.title=='MARCAS'" ion-button item-right color="light" icon-only clear (click)="deleteEntry($event, item, menuitem)">
                   <ion-icon name="trash" ></ion-icon>
                 </button>
-                <button *ngIf="menuitem.tipo!=1||item.title!='MEU BIOATEST'" ion-button color="light" icon-only small item-right clear (click)="menuitemclick($event,item,menuitem)">
+                <button *ngIf="menuitem.showeditbutton" ion-button color="light" icon-only small item-right clear (click)="menuitemclick($event,item,menuitem)">
                  <ion-icon name="create"   item-right></ion-icon>
                 </button>
                 <p color="light" *ngIf="menuitem.tipo==1" item-right>{{menuitem.title}} </p>
@@ -63,15 +63,63 @@
                 </button>
             </ion-list-header>
             <ion-list no-lines *ngIf="menuitem.showdados&&item.show" style="background-color: white">
+
                 <!--<input type="file" capture="camera" accept="image/*" id="takePictureField">-->
-                <ion-item text-wrap *ngFor="let linha of menuitem.linhas">
-                    <b>{{linha.title}}</b>: <span style="user-select:text" *ngIf="linha.title!='WEBSITE'&&linha.title!='EMAIL'">{{linha.info}}</span>
+                <ion-item no-padding text-wrap *ngFor="let linha of menuitem.linhas">
+
+                    <ion-list *ngIf="linha.dbdata!=null" style="background-color: white">
+                        <ion-list-header text-left style="color: black" color="white" (click)="itemClick($event, linha.dbdata)">
+                            {{linha.title}}
+                            <button *ngIf="linha.title=='PRODUTOS'" ion-button color="primary" icon-only item-right clear (click)="addproduto($event,linha)">                 
+                             <ion-icon  name="add-circle" item-right></ion-icon>
+                            </button>
+                            <ion-icon *ngIf="linha.dbdata.show" name="arrow-dropdown" item-right></ion-icon>
+                            <ion-icon *ngIf="!linha.dbdata.show" name="arrow-dropright" item-right></ion-icon>
+                        </ion-list-header>
+                        <ion-list margin-left="32px" *ngIf="linha.dbdata.show">
+                            <ion-item-group *ngFor="let itemlinha of linha.dbdata.items">
+                                <ion-item style="color: #F5811E" text-wrap>
+                                    <b>{{itemlinha.title}}</b>
+                                    <button *ngIf="itemlinha.id==1" ion-button color="light" icon-only small item-right clear (click)="itemCreateClick($event, itemlinha)">                 
+                                 <ion-icon  style="color: #F5811E" name="create" item-right></ion-icon>
+                                </button>
+                                    <button ion-button color="light" icon-only small item-right clear (click)="itemClick($event, itemlinha)">                 
+                                 <ion-icon *ngIf="itemlinha.show" style="color: #F5811E" name="arrow-dropdown" item-right></ion-icon>
+                                 <ion-icon  *ngIf="!itemlinha.show" style="color: #F5811E" name="arrow-dropright" item-right></ion-icon>
+                                </button>
+
+                                </ion-item>
+                                <ion-item *ngIf="itemlinha.show">
+                                    <ion-card *ngFor="let list of itemlinha.menuitems">
+                                        <ion-card-content style="color: #0a0a0a">
+                                            <ion-item>
+                                                <ion-thumbnail *ngIf="itemlinha.title=='LISTAPRODUTOS'" item-left>
+                                                    <img src="http://athena3d.com.br/bioatest/imagens/{{list.dbdata.imagem}}">
+                                                </ion-thumbnail>
+                                                <span>{{list.dbdata.nome}}</span>
+                                                <button *ngIf="itemlinha.title=='LISTAPRODUTOS'" ion-button item-right color="danger" icon-only clear (click)="deleteEntry($event, itemlinha, list)">
+                                                 <ion-icon name="trash" ></ion-icon>
+                                                </button>
+                                            </ion-item>
+                                        </ion-card-content>
+                                    </ion-card>
+                                    <ion-infinite-scroll *ngIf="itemlinha.title=='LISTAPRODUTOS'" (ionInfinite)="$event.waitFor(populateListProdUsr())">
+                                        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+                                    </ion-infinite-scroll>
+                                </ion-item>
+                            </ion-item-group>
+                        </ion-list>
+
+                    </ion-list>
+                    <span *ngIf="linha.dbdata==null"><b >{{linha.title}}</b>:</span>
+                    <span style="user-select:text" *ngIf="linha.dbdata==null&&linha.title!='WEBSITE' &&linha.title!='EMAIL'">{{linha.info}}</span>
                     <a *ngIf="linha.title=='WEBSITE'" [href]="linha.info">{{linha.info}}</a>
-                    <a *ngIf="linha.title=='EMAIL'" [href]="'mailto:'+linha.info">{{linha.info}}</a>
+                    <a *ngIf="linha.title=='EMAIL'" [href]=" 'mailto:'+linha.info">{{linha.info}}</a>
+
                     <ion-card *ngIf="linha.title=='IMAGEM'">
-                        <img src="{{pathForImage(menuitem.dbdata.imagem)}}" [hidden]="menuitem.dbdata.imagem === null||menuitem.dbdata.imagem === undefined">
+                        <img src="{{pathForImage(menuitem.dbdata.imagem)}}" [hidden]="menuitem.dbdata.imagem===null||menuitem.dbdata.imagem===undefined">
                         <ion-card-content>
-                            <h3 [hidden]="menuitem.dbdata.imagem !== null">Por Favor selecione uma imagem!</h3>
+                            <h3 [hidden]="menuitem.dbdata.imagem !==null">Por Favor selecione uma imagem!</h3>
                             <ion-buttons item-center>
                                 <button ion-button icon-left item-center (click)="presentActionSheet(menuitem,linha)">
                                  <ion-icon name="camera"></ion-icon>Selecionar imagem

@@ -17,6 +17,8 @@ import { File } from '@ionic-native/file';
 import { Transfer } from '@ionic-native/transfer';
 import { FilePath } from '@ionic-native/file-path';
 import { Camera } from '@ionic-native/camera';
+import { ElasticModule } from 'angular2-elastic';
+import { ListaPage } from '../pages/listaprodutos/listaprodutos';
 @NgModule({
   declarations: [
     BioatestApp,
@@ -26,10 +28,11 @@ import { Camera } from '@ionic-native/camera';
     newNavbar,
     Rodape,
     CadastroPage,
-    BuscaCEPPage
+    BuscaCEPPage,
+    ListaPage
   ],
   imports: [
-    IonicModule.forRoot(BioatestApp)
+    IonicModule.forRoot(BioatestApp),ElasticModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -40,7 +43,8 @@ import { Camera } from '@ionic-native/camera';
     newNavbar,
     Rodape,
     CadastroPage,
-    BuscaCEPPage
+    BuscaCEPPage,
+    ListaPage
   ],
   providers: [
     SpeechRecognition,

@@ -4,25 +4,29 @@ import {
   ActionSheetController, ToastController, LoadingController, Loading
 } from 'ionic-angular';
 import { DadosUsuario, TarefaService } from '../../services/json.server';
-import { CadastroPage } from '../../pages/cadastrologin/cadastrologin';
+import { CadastroPage } from '../cadastrologin/cadastrologin';
+import { ListaPage } from '../listaprodutos/listaprodutos';
 
 import { File } from '@ionic-native/file';
 import { Transfer, TransferObject } from '@ionic-native/transfer';
 import { FilePath } from '@ionic-native/file-path';
 import { Camera } from '@ionic-native/camera';
 declare var cordova: any;
-export class DBData{
-  constructor(){
+export class DBData {
+  constructor() {
     this.items = [];
+    this.show=false;
   }
-   public items: Array<{
+  public show:boolean;
+  public items: Array<{
     cor: number, title: string, id: number, show: boolean,
     menuitems: Array<{
-      title: string, tipo: number, showdados: boolean,
+      title: string, tipo: number, showdados: boolean, showeditbutton: boolean,
       linhas: Array<{
         title: string,
         info: string,
-        imagem?: string
+        imagem?: string,
+        dbdata:DBData
       }>,
       dbdata?: {
         id?: any,
@@ -41,8 +45,10 @@ export class DBData{
         password?: string,
         password2?: string,
         idmarca?: any,
+        idproduto?: any,
         idcategoria?: any,
-        imagem?: string
+        imagem?: string,
+        preco?:number
       }
     }>
   }>;
@@ -58,7 +64,7 @@ export class Principal {
   selectedItem: any;
   hasabaaberta: boolean = false;
   menubuttons: string[];
-  dbdata:DBData=new DBData();
+  dbdata: DBData = new DBData();
   limit: number = 10;
   offset: number = 0;
   cansearchProd: boolean = false;
@@ -74,29 +80,93 @@ export class Principal {
         cor: 4, title: 'MEU BIOATEST', id: 1, show: false,
         menuitems: [
           {
-            title: 'DADOS', tipo: 0, showdados: false, linhas: [
-              { title: 'NOME', info: ts.dadosUsuario.nome },
-              { title: 'EMAIL', info: ts.dadosUsuario.email },
-              { title: 'ENDEREÇO', info: ts.dadosUsuario.endereco + ',' + ts.dadosUsuario.numero + '-' + ts.dadosUsuario.bairro + '-' + ts.dadosUsuario.cidade + '-' + ts.dadosUsuario.estado },
-              { title: 'FONE', info: ts.dadosUsuario.fone }]
+            title: (ts.dadosUsuario.tipo == "1" || ts.dadosUsuario.tipo == "2") ? 'DADOS CADASTRAIS' : 'DADOS', tipo: 0, showdados: false,
+            showeditbutton: true,
+            linhas: [
+              { title: 'NOME', info: ts.dadosUsuario.nome,dbdata:null },
+              { title: 'EMAIL', info: ts.dadosUsuario.email,dbdata:null },
+              { title: 'ENDEREÇO', info: ts.constroiendereco(ts.dadosUsuario),dbdata:null },
+              { title: 'FONE', info: ts.dadosUsuario.fone,dbdata:null }]
           },
-          { title: 'COMPRAS', tipo: 1, showdados: false, linhas: [] },
-          { title: 'MENSAGENS', tipo: 2, showdados: false, linhas: [] },
-          { title: 'UPLOADS', tipo: 3, showdados: false, linhas: [] }]
+          { title: 'COMPRAS', tipo: 1, showdados: false, showeditbutton: false, linhas: [] },
+          { title: 'MENSAGENS', tipo: 2, showdados: false, showeditbutton: true, linhas: [] },
+          { title: 'UPLOADS', tipo: 3, showdados: false, showeditbutton: true, linhas: [] }]
       });
-      this.dbdata.items.push({ cor: 4, title: 'BUSCAR PRODUTO', id: 2, show: false, menuitems: [] });
-      this.dbdata.items.push({ cor: 4, title: 'BUSCAR PROPRIEDADE', id: 3, show: false, menuitems: [] });
-      this.dbdata.items.push({ cor: 4, title: 'BUSCAR PONTO DE VENDA', id: 4, show: false, menuitems: [] });
-      this.dbdata.items.push({ cor: 4, title: 'CONTEÚDO', id: 5, show: false, menuitems: [] });
-      this.dbdata.items.push({ cor: 4, title: 'PREMIUM', id: 6, show: false, menuitems: [] });
-      this.dbdata.items.push({ cor: 1, title: 'PROMOÇÕES DE HOJE', id: 7, show: false, menuitems: [] });
+      if ((ts.dadosUsuario.tipo == "1" || ts.dadosUsuario.tipo == "2")) {
+        this.dbdata.items[0].menuitems = [];
+        this.dbdata.items[0].menuitems.push(
+          {
+            title: 'DADOS CADASTRAIS', tipo: 0, showdados: false, showeditbutton: true, linhas: [
+              { title: 'NOME', info: ts.dadosUsuario.nome,dbdata:null },
+              { title: 'EMAIL', info: ts.dadosUsuario.email,dbdata:null },
+              { title: 'WEBSITE', info: ts.dadosUsuario.site,dbdata:null },
+              { title: 'ENDEREÇO', info: ts.constroiendereco(ts.dadosUsuario),dbdata:null },
+              { title: 'FONE', info: ts.dadosUsuario.fone,dbdata:null }]
+          }
+        );
+        this.dbdata.items[0].menuitems.push(
+          {
+            title: 'DADOS DE REGISTRO', tipo: 2, showdados: false, showeditbutton: false, linhas: [
+              { title: 'SOBRE', info: " ",dbdata:new DBData },
+              { title: 'PRODUTOS', info: " ",dbdata:new DBData  },
+              { title: 'IMAGENS', info: " ",dbdata:new DBData  }
+            ]
+          },
+          { title: 'UPLOADS', tipo: 3, showdados: false,showeditbutton:false, linhas: [] },
+          { title: 'VENDAS REGISTRADAS', tipo: 4, showdados: false,showeditbutton:false, linhas: [] }
+        );
+        this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items.push({
+          cor: 2, title: 'HISTÓRICO', id: 1, show: false, menuitems: [
+            {
+              title: 'HISTÓRICO', tipo: 2, showdados: false, showeditbutton: false,dbdata:new DBData , linhas: [{ title: '', info: "", dbdata: null }]
+            }
+          ]
+        });
+        this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items.push({
+          cor: 2, title: 'VALORES', id: 1, show: false,menuitems: [
+             {
+              title: 'VALORES', tipo: 2, showdados: false, showeditbutton: false,dbdata:new DBData , linhas: [{ title: '', info: "", dbdata: null }]
+            }
+          ]
+        });
+        this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items.push({
+          cor: 2, title: 'MISSÃO', id: 1, show: false,menuitems: [
+             {
+              title: 'MISSÃO', tipo: 2, showdados: false, showeditbutton: false,dbdata:new DBData , linhas: [{ title: '', info: "", dbdata: null }]
+            }
+          ]
+        });
+        this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items.push({
+          cor: 2, title: 'LISTAPRODUTOS', id: 1, show: false,menuitems: []
+        });
+        ts.getProdListUsr(this, this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items[0], "*");
+        ts.getInfoUsuario(this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items[0],
+        this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items[1],
+        this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items[2]);
+        if (ts.dadosUsuario.tipo == "2") {
+          this.dbdata.items[0].menuitems[1].linhas.push(
+            { title: 'PONTOS DE VENDA', info: " ",dbdata:new DBData  }
+          );
+        }
+      }
+      else {
+
+      }
+      if (ts.dadosUsuario.tipo == "0") {
+        this.dbdata.items.push({ cor: 4, title: 'BUSCAR PRODUTO', id: 2, show: false, menuitems: [] });
+        this.dbdata.items.push({ cor: 4, title: 'BUSCAR PROPRIEDADE', id: 3, show: false, menuitems: [] });
+        this.dbdata.items.push({ cor: 4, title: 'BUSCAR PONTO DE VENDA', id: 4, show: false, menuitems: [] });
+        this.dbdata.items.push({ cor: 4, title: 'CONTEÚDO', id: 5, show: false, menuitems: [] });
+        this.dbdata.items.push({ cor: 4, title: 'PREMIUM', id: 6, show: false, menuitems: [] });
+        this.dbdata.items.push({ cor: 1, title: 'PROMOÇÕES DE HOJE', id: 7, show: false, menuitems: [] });
+      }
       if (ts.dadosUsuario.tipo == "3") {
-         this.dbdata.items.push({ cor: 4, title: 'CERTIFICADORAS', id: 8, show: false, menuitems: [] });
-         ts.getCertList(this.dbdata.items[7]);
-         this.dbdata.items.push({ cor: 4, title: 'CATEGORIAS', id: 9, show: false, menuitems: [] });
-         ts.getCategoriasList(this.dbdata.items[8]);
-         this.dbdata.items.push({ cor: 4, title: 'MARCAS', id: 10, show: false, menuitems: [] });
-         ts.getMarcasList(this.dbdata.items[9]);
+        this.dbdata.items.push({ cor: 4, title: 'CERTIFICADORAS', id: 8, show: false, menuitems: [] });
+        ts.getCertList(this.dbdata.items[1]);
+        this.dbdata.items.push({ cor: 4, title: 'CATEGORIAS', id: 9, show: false, menuitems: [] });
+        ts.getCategoriasList(this.dbdata.items[2]);
+        this.dbdata.items.push({ cor: 4, title: 'MARCAS', id: 10, show: false, menuitems: [] });
+        ts.getMarcasList(this.dbdata.items[3]);
         this.dbdata.items.push({ cor: 4, title: 'PRODUTOS', id: 11, show: false, menuitems: [] });
       }
       setTimeout(() => { this.cont.resize(); }, 500);
@@ -139,7 +209,7 @@ export class Principal {
 
   public takePicture(menuitem, sourceType, linha) {
     var options = {
-      allowEdit:true,
+      allowEdit: true,
       quality: 100,
       sourceType: sourceType,
       saveToPhotoAlbum: false,
@@ -244,12 +314,22 @@ export class Principal {
     if (this.cansearchProd) {
       return new Promise((resolve) => {
         setTimeout(() => {
-          this.ts.getProdList(this, this.dbdata.items[10], "*");
+          this.ts.getProdList(this, this.dbdata.items[4], "*",false);
           resolve();
         }, 500);
       });
     }
     else return null;
+  }
+
+  populateListProdUsr(): Promise<any> {
+     return new Promise((resolve) => {
+        setTimeout(() => {
+          this.ts.getProdListUsr(this, this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items[0], "*");
+          resolve();
+        }, 500);
+      });
+   
   }
 
   showhideclick(event, item, menuitem) {
@@ -261,16 +341,17 @@ export class Principal {
     event.stopPropagation();
   }
 
-  editaNome(insert,item, menuitem) {
+  editaNome(insert, item, menuitem) {
     let alert = this.alertCtrl.create({
-      title: insert?'Inserir '+item.title:'Editar '+item.title,
+      title: insert ? 'Inserir ' + item.title : 'Editar ' + item.title,
       inputs: [
         {
           name: 'nome',
-          label:"NOME",
+          label: "NOME",
+          type:'text',
           placeholder: 'Digite o nome',
-          value:menuitem!=null?menuitem.dbdata.nome:''
-        }       
+          value: menuitem != null ? menuitem.dbdata.nome : ''
+        }
       ],
       buttons: [
         {
@@ -283,9 +364,9 @@ export class Principal {
           text: 'Salvar',
           handler: data => {
             if (data.nome) {
-              this.ts.updateSoumcampo(this,insert,menuitem!=null?menuitem.tipo:-1,"nome",data.nome,item,menuitem);
+              this.ts.updateSoumcampo(this, insert, menuitem != null ? menuitem.tipo : -1, "nome", data.nome, item, menuitem);
             } else {
-              
+
               return false;
             }
           }
@@ -295,21 +376,21 @@ export class Principal {
     alert.present();
   }
 
-  menuitemclick(event,item, menuitem) {
+  menuitemclick(event, item, menuitem) {
     if (item.title == "CERTIFICADORAS") {
-      this.navCtrl.push(CadastroPage, {principal:this, edit: true, getcep: false, tabela: "certificadoras", idcert: menuitem.tipo, formvariables: menuitem.dbdata, item: { title: "certificadora" }, menuitem: menuitem });
+      this.navCtrl.push(CadastroPage, { principal: this, edit: true, getcep: false, tabela: "certificadoras", idcert: menuitem.tipo, formvariables: menuitem.dbdata, item: { title: "certificadora" }, menuitem: menuitem });
     }
     else if (item.title == "PRODUTOS") {
-      this.navCtrl.push(CadastroPage, {principal:this, edit: true, getcep: false, tabela: "produtos", idcert: menuitem.tipo, formvariables: menuitem.dbdata, item: { title: "produtos" }, menuitem: menuitem });
+      this.navCtrl.push(CadastroPage, { principal: this, edit: true, getcep: false, tabela: "produtos", idcert: menuitem.tipo, formvariables: menuitem.dbdata, item: { title: "produtos" }, menuitem: menuitem });
     }
     else if (item.title == "MEU BIOATEST") {
       if (menuitem.tipo == 0) {
-        this.navCtrl.push(CadastroPage, {principal:this, edit: true, getcep: false, tabela: "usuarios", formvariables: this.ts.dadosUsuario, item: { title: "meu cadastro" }, menuitem: menuitem });
+        this.navCtrl.push(CadastroPage, { principal: this, edit: true, getcep: false, tabela: "usuarios", formvariables: this.ts.dadosUsuario, item: { title: "meu cadastro" }, menuitem: menuitem });
       }
     }
     else
-     this.editaNome(false,item, menuitem); 
-     event.stopPropagation();
+      this.editaNome(false, item, menuitem);
+    event.stopPropagation();
   }
 
   novacert(event, item) {
@@ -317,12 +398,18 @@ export class Principal {
       let proddados = new DadosUsuario;
       proddados.idcategoria = "22";
       proddados.idmarca = "0";
-      let modal = this.modalCtrl.create(CadastroPage, {principal:this, edit: false, getcep: item.title == "PRODUTOS" ? false : true, tabela: item.title.toLowerCase(), formvariables: proddados, item: item });
+      let modal = this.modalCtrl.create(CadastroPage, { principal: this, edit: false, getcep: item.title == "PRODUTOS" ? false : true, tabela: item.title.toLowerCase(), formvariables: proddados, item: item });
       modal.present();
     }
     else
-     this.editaNome(true,item, null); 
+      this.editaNome(true, item, null);
     event.stopPropagation();
+  }
+
+  addproduto(event,linha){
+     let modal = this.modalCtrl.create(ListaPage, { principal: this, edit: false, tabela: linha.title.toLowerCase(), formvariables: linha.dbdata, item: linha });
+      modal.present();
+      event.stopPropagation();
   }
 
   deleteEntry(event, item, menuitem) {
@@ -340,10 +427,11 @@ export class Principal {
         {
           text: 'Excluir',
           handler: () => {
-            this.ts.deleteEntry(this,item,menuitem.tipo, menuitem.dbdata);
+            this.ts.deleteEntry(this, item, menuitem.tipo, menuitem.dbdata);
           }
         }
       ]
+
     });
     alert.present();
 
@@ -355,20 +443,39 @@ export class Principal {
     if (item.show) {
       switch (item.id) {
         case 8:
-          this.ts.getCertList(this.dbdata.items[7]);
+          this.ts.getCertList(this.dbdata.items[1]);
           break;
         case 9:
-          this.ts.getCategoriasList(this.dbdata.items[8]);
+          this.ts.getCategoriasList(this.dbdata.items[2]);
           break;
         case 10:
-          this.ts.getMarcasList(this.dbdata.items[9]);
+          this.ts.getMarcasList(this.dbdata.items[3]);
           break;
         case 11:
           this.cansearchProd = true;
           this.populateListProd();
           break;
       }
+      if(item.title=="LISTAPRODUTOS"){
+         this.ts.getProdListUsr(this, this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items[0], "*");
+      }
     }
+  }
+
+  itemCreateClick(event, itemlinha){
+    if(itemlinha.title=='HISTÓRICO'||itemlinha.title=='VALORES'||itemlinha.title=='MISSÃO'){
+      let modal = this.modalCtrl.create(CadastroPage, { principal: this, edit: true, getcep:  false, tabela: "infousuario",
+       formvariables: itemlinha.menuitems[0].dbdata,
+       item:itemlinha
+      });
+      modal.present();
+    }
+    event.stopPropagation();
+  }
+
+  itemClick(event, dbdata) {
+    dbdata.show = !dbdata.show;
+    event.stopPropagation();
   }
 
   itemTapped(event, item) {
@@ -377,26 +484,27 @@ export class Principal {
         data.show = false;
     }
     item.show = !item.show;
-    if (!item.show) {    
+    if (!item.show) {
       if (item.id == 11) {
         this.cansearchProd = false;
-        this.offset = 0;        
+        this.offset = 0;
       }
+      if(item.id==8||item.id==9||item.id==10||item.id==11)
       item.menuitems = [];
     }
-    else 
-      this.updatemenuitemslist(item);        
-   
+    else
+      this.updatemenuitemslist(item);
+
 
     this.hasabaaberta = item.show;
     if (item.show && item.title == "CERTIFICADORAS") {
-      this.ts.getCertList(this.dbdata.items[7]);
+      this.ts.getCertList(this.dbdata.items[1]);
     }
     else if (item.show && item.title == "CATEGORIAS") {
-      this.ts.getCategoriasList(this.dbdata.items[8]);
+      this.ts.getCategoriasList(this.dbdata.items[2]);
     }
     else if (item.show && item.title == "MARCAS") {
-      this.ts.getMarcasList(this.dbdata.items[9]);
+      this.ts.getMarcasList(this.dbdata.items[3]);
     }
     event.stopPropagation();
   }
