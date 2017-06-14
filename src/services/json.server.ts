@@ -334,6 +334,11 @@ export class TarefaService {
                     item.menuitems = [];
                     this.sendNotification(`O produto ${name} foi excluído do sistema`);
                 }
+                else if (this.tabela == "userimages"){
+                    principal.offset2=0;
+                    item.menuitems = [];
+                    this.sendNotification(`Imagem excluída com sucesso!`);
+                }
                 principal.updatemenuitemslist(item);
             }
             else {
@@ -522,41 +527,75 @@ export class TarefaService {
                     });
             });
         });
+    }
 
+    getImgsListUsr(page: any, mn: any, categoria: any) {
+        this.storage.ready().then(() => {
+            this.storage.get('userid').then((idusuario) => {
+                let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+                    headers: any = new Headers({ 'Content-Type': type }),
+                    options: any = new RequestOptions({ headers: headers }),
+                    url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=getimgslist" +
+                         "&idusuario=" + idusuario + "&offset=" + page.offset2 + "&limit=" + page.limit;
+                this.http.get(url, options).map(res => res.json())
+                    .subscribe((data) => {
+                         if(data[0].id!="null"){
+                            data.forEach(row => {
+                                mn.menuitems.push({
+                                    title: row.texto, tipo: row.id, showdados: false, linhas: [],
+                                    dbdata: {
+                                        nome: row.texto,
+                                        id: row.id,
+                                        imagem: row.imagem
+                                    }
+                                });
+                            });
+                           
+                            page.offset2 += page.limit;
+                        }
+                    });
+            });
+        });
     }
 
 
-    getProdList(page: any, mn: any,categoria:any,_showdados:boolean) {
-        let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
-            headers: any = new Headers({ 'Content-Type': type }),
-            options: any = new RequestOptions({ headers: headers }),
-            url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=prodlist&categoria=" +
-                categoria +"&offset=" + page.offset + "&limit=" + page.limit;
-        this.http.get(url, options).map(res => res.json())
-            .subscribe((data) => {
-                if (data[0].nome != "null") {
-                    //mn.menuitems = [];
-                    data.forEach(row => {
-                       mn.menuitems.push({
-                            title: row.nome, tipo: row.id, showdados: _showdados, linhas: [
-                                { title: 'NOME', info: row.nome,dbdata:null  },
-                                { title: 'MARCA', info: row.marca,dbdata:null },
-                                { title: 'CATEGORIA', info: row.categoria,dbdata:null },
-                                { title: 'IMAGEM', info: row.imagem,dbdata:null }
-                            ],
-                            dbdata: {
-                                id:row.id,
-                                nome: row.nome,
-                                idmarca: row.idmarca,
-                                idcategoria: row.idcategoria,
-                                imagem: row.imagem
-                            }
-                        });
+
+    getProdList(page: any, mn: any, categoria: any, _showdados: boolean) {
+        this.storage.ready().then(() => {
+            this.storage.get('userid').then((idusuario) => {
+                let type: string = "application/x-www-form-urlencoded; charset=UTF-8",
+                    headers: any = new Headers({ 'Content-Type': type }),
+                    options: any = new RequestOptions({ headers: headers }),
+                    url: any = "http://www.athena3d.com.br/bioatest/retrieve-data.php?key=prodlist&categoria=" +
+                        categoria + "&offset=" + page.offset + "&limit=" + page.limit+ "&idusuario=" + idusuario;
+                this.http.get(url, options).map(res => res.json())
+                    .subscribe((data) => {
+                        if (data[0].nome != "null") {
+                            //mn.menuitems = [];
+                            data.forEach(row => {
+                                mn.menuitems.push({
+                                    title: row.nome, tipo: row.id, showdados: _showdados, linhas: [
+                                        { title: 'NOME', info: row.nome, dbdata: null },
+                                        { title: 'MARCA', info: row.marca, dbdata: null },
+                                        { title: 'CATEGORIA', info: row.categoria, dbdata: null },
+                                        { title: 'IMAGEM', info: row.imagem, dbdata: null }
+                                    ],
+                                    dbdata: {
+                                        id: row.id,
+                                        nome: row.nome,
+                                        idmarca: row.idmarca,
+                                        idcategoria: row.idcategoria,
+                                        imagem: row.imagem
+                                    }
+                                });
+                            });
+                            page.offset += page.limit;
+                        }
+                        else page.cansearchProd = false;
                     });
-                    page.offset += page.limit;
-                }
-                else page.cansearchProd = false;
             });
+        });
+
     }
 
     addImagetoDB(id,tabela,imgdata,fnome) {            
@@ -579,7 +618,7 @@ export class TarefaService {
 
 
     deleteIMG(menuitem,linha) {            
-        let body: string = "key=deleteimg&prodid=" + menuitem.dbdata.id +"&imagem=" + menuitem.dbdata.imagem ,
+        let body: string = "key=deleteimg&prodid=" + menuitem.dbdata.id +"&imagem=" + menuitem.dbdata.imagem+"&tabela=" + this.tabela ,
             type: string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers: any = new Headers({ 'Content-Type': type }),
             options: any = new RequestOptions({ headers: headers }),

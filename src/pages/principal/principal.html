@@ -73,6 +73,9 @@
                             <button *ngIf="linha.title=='PRODUTOS'" ion-button color="primary" icon-only item-right clear (click)="addproduto($event,linha)">                 
                              <ion-icon  name="add-circle" item-right></ion-icon>
                             </button>
+                            <button *ngIf="linha.title=='IMAGENS'" ion-button color="primary" icon-only item-right clear (click)="addimagem($event,linha)">                 
+                             <ion-icon  name="add-circle" item-right></ion-icon>
+                            </button>
                             <ion-icon *ngIf="linha.dbdata.show" name="arrow-dropdown" item-right></ion-icon>
                             <ion-icon *ngIf="!linha.dbdata.show" name="arrow-dropright" item-right></ion-icon>
                         </ion-list-header>
@@ -89,20 +92,27 @@
                                 </button>
 
                                 </ion-item>
-                                <ion-item *ngIf="itemlinha.show">
+                                <ion-item no-padding *ngIf="itemlinha.show">
                                     <ion-card *ngFor="let list of itemlinha.menuitems">
                                         <ion-card-content style="color: #0a0a0a">
                                             <ion-item>
-                                                <ion-thumbnail *ngIf="itemlinha.title=='LISTAPRODUTOS'" item-left>
+                                                <ion-thumbnail *ngIf="itemlinha.title=='LISTAPRODUTOS'||itemlinha.title=='MINHAS IMAGENS'" item-left>
                                                     <img src="http://athena3d.com.br/bioatest/imagens/{{list.dbdata.imagem}}">
                                                 </ion-thumbnail>
                                                 <span>{{list.dbdata.nome}}</span>
                                                 <button *ngIf="itemlinha.title=='LISTAPRODUTOS'" ion-button item-right color="danger" icon-only clear (click)="deleteEntry($event, itemlinha, list)">
                                                  <ion-icon name="trash" ></ion-icon>
                                                 </button>
+                                                <button *ngIf="itemlinha.title=='MINHAS IMAGENS'" ion-button item-right color="danger" icon-only clear (click)="deleteIMG(list, itemlinha)">
+                                                 <ion-icon name="trash" ></ion-icon>
+                                                </button>
                                             </ion-item>
                                         </ion-card-content>
                                     </ion-card>
+
+                                    <ion-infinite-scroll *ngIf="itemlinha.title=='MINHAS IMAGENS'" (ionInfinite)="$event.waitFor(populateListImgsUsr())">
+                                        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+                                    </ion-infinite-scroll>
                                     <ion-infinite-scroll *ngIf="itemlinha.title=='LISTAPRODUTOS'" (ionInfinite)="$event.waitFor(populateListProdUsr())">
                                         <ion-infinite-scroll-content></ion-infinite-scroll-content>
                                     </ion-infinite-scroll>

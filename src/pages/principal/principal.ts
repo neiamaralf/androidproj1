@@ -67,6 +67,7 @@ export class Principal {
   dbdata: DBData = new DBData();
   limit: number = 10;
   offset: number = 0;
+  offset2: number = 0;
   cansearchProd: boolean = false;
   constructor(public platform: Platform, public navCtrl: NavController, public ts: TarefaService, public navParams: NavParams,
     public modalCtrl: ModalController, private camera: Camera,
@@ -139,6 +140,10 @@ export class Principal {
         this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items.push({
           cor: 2, title: 'LISTAPRODUTOS', id: 1, show: false,menuitems: []
         });
+        this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items.push({
+          cor: 2, title: 'MINHAS IMAGENS', id: 1, show: false,menuitems: []
+        });
+        ts.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
         ts.getProdListUsr(this, this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items[0], "*");
         ts.getInfoUsuario(this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items[0],
         this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items[1],
@@ -175,37 +180,46 @@ export class Principal {
 
 
   public uploadImage(menuitem, linha) {
-    var url = "http://www.athena3d.com.br/bioatest/uploadimage.php";
-    var newfilename = this.createFileName();
-    var targetPath = this.lastImage;
-    var options = {
-      fileKey: "file",
-      fileName: newfilename,
-      chunkedMode: false,
-      mimeType: "multipart/form-data",
-      params: { 'fileName': newfilename, 'idprod': menuitem.dbdata.id }
-    };
-    const fileTransfer: TransferObject = this.transfer.create();
-    this.loading = this.loadingCtrl.create({
-      content: 'Enviando foto...',
-    });
-    this.loading.present();
-    fileTransfer.upload(targetPath, url, options).then(data => {
-      console.log(data);
-      this.loading.dismissAll();
-      setTimeout(() => { menuitem.dbdata.imagem = newfilename; linha.info = newfilename }, 500)
+    this.ts.storage.ready().then(() => {
+      this.ts.storage.get('userid').then((idusuario) => {
+        var url = "http://www.athena3d.com.br/bioatest/uploadimage.php";
+        var newfilename = this.createFileName();
+        var targetPath = this.lastImage;
+        var options = {
+          fileKey: "file",
+          fileName: newfilename,
+          chunkedMode: false,
+          mimeType: "multipart/form-data",
+          params: { 'tabela': linha.title.toLowerCase(), 'fileName': newfilename, 'idprod': menuitem.dbdata.id,'idusuario':idusuario,'texto':linha.info }
+        };
+        const fileTransfer: TransferObject = this.transfer.create();
+        this.loading = this.loadingCtrl.create({
+          content: 'Enviando foto...',
+        });
+        this.loading.present();
+        fileTransfer.upload(targetPath, url, options).then(data => {
+          console.log(data);
+          this.loading.dismissAll();
+          setTimeout(() => {
+            menuitem.dbdata.imagem = newfilename;
+            linha.info = newfilename;
+          }, 500)
 
-      this.presentToast('Imagem enviada com sucesso.');
-    }, err => {
-      this.loading.dismissAll();
-      this.presentToast('Erro no envio da imagem.');
+          this.presentToast('Imagem enviada com sucesso.');
+        }, err => {
+          this.loading.dismissAll();
+          this.presentToast('Erro no envio da imagem.');
+        });
+      });
     });
   }
 
   deletaImagem(menuitem, linha) {
+     this.ts.tabela = linha.title.toLowerCase();
+    if(this.ts.tabela=="minhas imagens")
+     this.ts.tabela="userimages";
     this.ts.deleteIMG(menuitem, linha);
   }
-
 
   public takePicture(menuitem, sourceType, linha) {
     var options = {
@@ -253,29 +267,21 @@ export class Principal {
           this.uploadImage(menuitem, linha);
         }
       }
-
     }, (err) => {
       this.presentToast('Erro ao selecionar imagem.');
     });
   }
 
   private createFileName() {
-    var d = new Date(),
-      n = d.getTime(),
-      newFileName = n + ".jpg";
+    var d = new Date(), n = d.getTime(), newFileName = n + ".jpg";
     return newFileName;
   }
 
   private presentToast(text) {
-    let toast = this.toastCtrl.create({
-      message: text,
-      duration: 3000,
-      position: 'top'
-    });
+    let toast = this.toastCtrl.create({message: text,duration: 3000,position: 'top'});
     toast.present();
   }
 
-  // Always get the accurate path to your apps folder
   public pathForImage(img) {
     if (img === null) {
       return '';
@@ -309,7 +315,6 @@ export class Principal {
     actionSheet.present();
   }
 
-
   populateListProd(): Promise<any> {
     if (this.cansearchProd) {
       return new Promise((resolve) => {
@@ -328,8 +333,16 @@ export class Principal {
           this.ts.getProdListUsr(this, this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items[0], "*");
           resolve();
         }, 500);
-      });
-   
+      });   
+  }
+
+  populateListImgsUsr(): Promise<any> {
+     return new Promise((resolve) => {
+        setTimeout(() => {
+          this.ts.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
+          resolve();
+        }, 500);
+      });   
   }
 
   showhideclick(event, item, menuitem) {
@@ -412,8 +425,14 @@ export class Principal {
       event.stopPropagation();
   }
 
+   addimagem(event,linha){
+     this.presentActionSheet(linha,linha);
+   }
+
   deleteEntry(event, item, menuitem) {
     this.ts.tabela = item.title.toLowerCase();
+    if(this.ts.tabela=="minhas imagens")
+     this.ts.tabela="userimages";
     let alert = this.alertCtrl.create({
       title: 'Confirmar exclusão',
       message: 'Tem certeza que quer excluir ' + menuitem.title + '?',
@@ -458,6 +477,9 @@ export class Principal {
       }
       if(item.title=="LISTAPRODUTOS"){
          this.ts.getProdListUsr(this, this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items[0], "*");
+      }
+      else if(item.title=="MINHAS IMAGENS"){
+         this.ts.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
       }
     }
   }

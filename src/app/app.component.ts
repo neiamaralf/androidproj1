@@ -28,12 +28,12 @@ export class BioatestApp {
   initializeApp() {
     this.platform.ready().then(() => {
       console.log(this.platform.platforms());
-     let alert = this.al.create({
+     /*let alert = this.al.create({
     title: 'Low battery',
     subTitle: JSON.stringify(this.platform.platforms()),
     buttons: ['Dismiss']
   });
-  alert.present();
+  alert.present();*/
       this.statusBar.styleDefault();
       this.splashScreen.hide();
     });
