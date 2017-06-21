@@ -15,12 +15,21 @@ export class ListaPage {
  selAll: boolean = false;
  selCount: number = 0;
  principal:any;
+ alvo:any;
  dbdata: DBData = new DBData();
  constructor(public navCtrl: NavController, public NP: NavParams, public ts: TarefaService) {
   this.item = NP.get('item');
   this.principal=NP.get('principal');
-  this.dbdata.items.push({ cor: 4, title: 'PRODUTOS', id: 11, show: false, menuitems: [] });
-  this.ts.getProdList(this, this.dbdata.items[0], "*", this.selAll);
+  this.alvo=NP.get('alvo');
+  this.dbdata.items.push({  title: 'PRODUTOS', id: 11, show: false, menuitems: [] });
+  this.refreshLists();
+ }
+
+ refreshLists() {
+   if (this.alvo == "produtos")
+     this.ts.getProdList(this, this.dbdata.items[0], "*", this.selAll);
+   else if (this.alvo == "parceiros")
+     this.ts.getParceirosList(this, this.dbdata.items[0], "*", this.selAll);
  }
 
  chkSelTudoClick(event) {
@@ -45,15 +54,18 @@ export class ListaPage {
  populateListProd(): Promise<any> {
    return new Promise((resolve) => {
     setTimeout(() => {
-     this.ts.getProdList(this, this.dbdata.items[0], "*", this.selAll);
+     this.refreshLists();
      resolve();
     }, 500);
    });  
  }
 
- add(){
-  this.ts.insertProdLista(this.principal,this.dbdata.items[0],this.dbdata.items[0].menuitems);
-  this.dismiss();
+ add() {
+   if (this.alvo == "produtos")
+     this.ts.insertProdLista(this.principal, this.dbdata.items[0], this.dbdata.items[0].menuitems);
+   else if (this.alvo == "parceiros")
+     this.ts.insertParceiroLista(this.principal, this.dbdata.items[0], this.dbdata.items[0].menuitems);
+   this.dismiss();
  }
 
  dismiss() {

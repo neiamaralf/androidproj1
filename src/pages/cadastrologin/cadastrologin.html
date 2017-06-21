@@ -63,7 +63,7 @@
                         </ion-item>
                     </ion-item-group>
                     <ion-item-group *ngIf="tarefaService.tabela!='infousuario'">
-                        <ion-item-divider color=" light">{{tarefaService.tabela=="certificadoras"?"Nome da certificadora ":((tarefaService.tabela=="produtos")?"Nome do produto":"Nome de usuário")}} *</ion-item-divider>
+                        <ion-item-divider color="light">{{tarefaService.tabela=='certificadoras'?'Nome da certificadora':tarefaService.tabela=='produtos'?'Nome do produto':'Nome de usuário'}}</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="text" [placeholder]="tarefaService.tabela=='certificadoras' ? 'Digite o nome da certificadora...': 'Digite o nome de usuário...' " formControlName="name" [(ngModel)]="formvariables.nome"></ion-input>
                         </ion-item>
@@ -144,13 +144,13 @@
                         </ion-item>
                     </ion-item-group>
 
-                    <ion-item-group *ngIf="tarefaService.tabela!='certificadoras' &&tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='certificadoras'&&tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Senha *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="password" placeholder="Digite a senha..." formControlName="password" [(ngModel)]="formvariables.password"></ion-input>
                         </ion-item>
                     </ion-item-group>
-                    <ion-item-group *ngIf="tarefaService.tabela!='certificadoras' &&tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
+                    <ion-item-group *ngIf="tarefaService.tabela!='certificadoras'&&tarefaService.tabela!='produtos'&&tarefaService.tabela!='infousuario'">
                         <ion-item-divider color="light">Confirmação Senha *</ion-item-divider>
                         <ion-item>
                             <ion-input ng-value="" type="password" placeholder="Digite novamente a senha..." formControlName="password2" [(ngModel)]="formvariables.password2"></ion-input>

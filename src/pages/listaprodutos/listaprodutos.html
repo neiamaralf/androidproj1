@@ -26,11 +26,11 @@
                 <ion-checkbox color="dark" [(ngModel)]="item.showdados" (click)="chkClick($event,item)"></ion-checkbox>
                 <h2 item-left>{{item.dbdata.nome}}</h2>
 
-                <ion-thumbnail item-right>
+                <ion-thumbnail *ngIf="alvo == 'produtos'" item-right>
                     <img src="http://athena3d.com.br/bioatest/imagens/{{item.dbdata.imagem}}">
                 </ion-thumbnail>
             </ion-item>
-            <ion-input type="text" placeholder="Preço" [(ngModel)]="item.dbdata.preco"></ion-input>
+            <ion-input *ngIf="alvo == 'produtos'" type="text" placeholder="Preço" [(ngModel)]="item.dbdata.preco"></ion-input>
             <ion-item-divider color="light"></ion-item-divider>
         </ion-item-group>
 

@@ -76,6 +76,9 @@
                             <button *ngIf="linha.title=='IMAGENS'" ion-button color="primary" icon-only item-right clear (click)="addimagem($event,linha)">                 
                              <ion-icon  name="add-circle" item-right></ion-icon>
                             </button>
+                            <button *ngIf="linha.title=='PONTOS DE VENDA'" ion-button color="primary" icon-only item-right clear (click)="addpontodevenda($event,linha)">                 
+                             <ion-icon  name="add-circle" item-right></ion-icon>
+                            </button>
                             <ion-icon *ngIf="linha.dbdata.show" name="arrow-dropdown" item-right></ion-icon>
                             <ion-icon *ngIf="!linha.dbdata.show" name="arrow-dropright" item-right></ion-icon>
                         </ion-list-header>
@@ -103,7 +106,10 @@
                                                 <button *ngIf="itemlinha.title=='LISTAPRODUTOS'" ion-button item-right color="danger" icon-only clear (click)="deleteEntry($event, itemlinha, list)">
                                                  <ion-icon name="trash" ></ion-icon>
                                                 </button>
-                                                <button *ngIf="itemlinha.title=='MINHAS IMAGENS'" ion-button item-right color="danger" icon-only clear (click)="deleteIMG(list, itemlinha)">
+                                                <button *ngIf="itemlinha.title=='MINHAS IMAGENS'" ion-button item-right color="danger" icon-only clear (click)="deletaImagem(list, itemlinha)">
+                                                 <ion-icon name="trash" ></ion-icon>
+                                                </button>
+                                                <button *ngIf="itemlinha.title=='MEUS PARCEIROS'" ion-button item-right color="danger" icon-only clear (click)="deletaImagem(list, itemlinha)">
                                                  <ion-icon name="trash" ></ion-icon>
                                                 </button>
                                             </ion-item>
@@ -111,6 +117,9 @@
                                     </ion-card>
 
                                     <ion-infinite-scroll *ngIf="itemlinha.title=='MINHAS IMAGENS'" (ionInfinite)="$event.waitFor(populateListImgsUsr())">
+                                        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+                                    </ion-infinite-scroll>
+                                    <ion-infinite-scroll *ngIf="itemlinha.title=='MEUS PARCEIROS'" (ionInfinite)="$event.waitFor(populateListParceirosUsr())">
                                         <ion-infinite-scroll-content></ion-infinite-scroll-content>
                                     </ion-infinite-scroll>
                                     <ion-infinite-scroll *ngIf="itemlinha.title=='LISTAPRODUTOS'" (ionInfinite)="$event.waitFor(populateListProdUsr())">

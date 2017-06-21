@@ -19,7 +19,7 @@ export class DBData {
   }
   public show:boolean;
   public items: Array<{
-    cor: number, title: string, id: number, show: boolean,
+    cor?: number, title: string, id: number, show: boolean,
     menuitems: Array<{
       title: string, tipo: number, showdados: boolean, showeditbutton: boolean,
       linhas: Array<{
@@ -68,6 +68,7 @@ export class Principal {
   limit: number = 10;
   offset: number = 0;
   offset2: number = 0;
+  offset3: number = 0;
   cansearchProd: boolean = false;
   constructor(public platform: Platform, public navCtrl: NavController, public ts: TarefaService, public navParams: NavParams,
     public modalCtrl: ModalController, private camera: Camera,
@@ -150,8 +151,13 @@ export class Principal {
         this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items[2]);
         if (ts.dadosUsuario.tipo == "2") {
           this.dbdata.items[0].menuitems[1].linhas.push(
-            { title: 'PONTOS DE VENDA', info: " ",dbdata:new DBData  }
+            { title: 'PONTOS DE VENDA', info: " ", dbdata: new DBData }
           );
+          this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items.push({
+            cor: 2, title: 'MEUS PARCEIROS', id: 1, show: false, menuitems: []
+          });
+          ts.getParceirosListUsr(this, this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0], "*");
+
         }
       }
       else {
@@ -185,13 +191,17 @@ export class Principal {
         var url = "http://www.athena3d.com.br/bioatest/uploadimage.php";
         var newfilename = this.createFileName();
         var targetPath = this.lastImage;
+        var tabela=linha.title.toLowerCase();
+        if(tabela=="imagem")//consertar....chuncho
+         tabela="produtos";
         var options = {
           fileKey: "file",
           fileName: newfilename,
           chunkedMode: false,
           mimeType: "multipart/form-data",
-          params: { 'tabela': linha.title.toLowerCase(), 'fileName': newfilename, 'idprod': menuitem.dbdata.id,'idusuario':idusuario,'texto':linha.info }
+          params: { 'tabela': tabela, 'fileName': newfilename, 'idprod': menuitem.dbdata.id,'idusuario':idusuario,'texto':linha.info }
         };
+        console.log(options);
         const fileTransfer: TransferObject = this.transfer.create();
         this.loading = this.loadingCtrl.create({
           content: 'Enviando foto...',
@@ -206,6 +216,12 @@ export class Principal {
           }, 500)
 
           this.presentToast('Imagem enviada com sucesso.');
+          if(tabela=="imagens"){
+          this.offset2=0;
+          this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0].menuitems=[];
+          this.ts.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
+        }
+          
         }, err => {
           this.loading.dismissAll();
           this.presentToast('Erro no envio da imagem.');
@@ -215,10 +231,12 @@ export class Principal {
   }
 
   deletaImagem(menuitem, linha) {
-     this.ts.tabela = linha.title.toLowerCase();
-    if(this.ts.tabela=="minhas imagens")
+    var title=linha.title.toLowerCase();
+    if(title=="minhas imagens")
      this.ts.tabela="userimages";
-    this.ts.deleteIMG(menuitem, linha);
+    else  if(title=="imagem")
+     this.ts.tabela="produtos";
+    this.ts.deleteIMG(this,menuitem, linha);
   }
 
   public takePicture(menuitem, sourceType, linha) {
@@ -248,14 +266,15 @@ export class Principal {
             dataDirectory: 'ms-appdata:///local/'
           }
         }
-        this.lastImage
+        
         if (this.platform.is('android') && sourceType === this.camera.PictureSourceType.PHOTOLIBRARY) {
           this.filePath.resolveNativePath(imagePath)
             .then(filePath => {
               let correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
               let currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
               this.lastImage = correctPath + currentName;
-              this.deletaImagem(menuitem, linha);
+              if(this.ts.tabela=="produtos")
+               this.deletaImagem(menuitem, linha);
               this.uploadImage(menuitem, linha);
             });
         } else {
@@ -263,7 +282,8 @@ export class Principal {
           var currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
           var correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
           this.lastImage = correctPath + currentName;
-          this.deletaImagem(menuitem, linha);
+          if (this.ts.tabela == "produtos")
+            this.deletaImagem(menuitem, linha);
           this.uploadImage(menuitem, linha);
         }
       }
@@ -315,6 +335,11 @@ export class Principal {
     actionSheet.present();
   }
 
+  addimagem(event,linha){
+     this.presentActionSheet(linha,linha);
+     event.stopPropagation();
+   }
+
   populateListProd(): Promise<any> {
     if (this.cansearchProd) {
       return new Promise((resolve) => {
@@ -340,6 +365,15 @@ export class Principal {
      return new Promise((resolve) => {
         setTimeout(() => {
           this.ts.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
+          resolve();
+        }, 500);
+      });   
+  }
+
+  populateListParceirosUsr(): Promise<any> {
+     return new Promise((resolve) => {
+        setTimeout(() => {
+          this.ts.getParceirosListUsr(this, this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0], "*");
           resolve();
         }, 500);
       });   
@@ -420,14 +454,16 @@ export class Principal {
   }
 
   addproduto(event,linha){
-     let modal = this.modalCtrl.create(ListaPage, { principal: this, edit: false, tabela: linha.title.toLowerCase(), formvariables: linha.dbdata, item: linha });
+     let modal = this.modalCtrl.create(ListaPage, {alvo:"produtos",principal: this, item: linha });
       modal.present();
       event.stopPropagation();
   }
 
-   addimagem(event,linha){
-     this.presentActionSheet(linha,linha);
-   }
+  addpontodevenda(event,linha){
+     let modal = this.modalCtrl.create(ListaPage, {alvo:"parceiros",principal: this, item: linha });
+      modal.present();
+      event.stopPropagation();
+  } 
 
   deleteEntry(event, item, menuitem) {
     this.ts.tabela = item.title.toLowerCase();
@@ -480,6 +516,9 @@ export class Principal {
       }
       else if(item.title=="MINHAS IMAGENS"){
          this.ts.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
+      }
+      else if(item.title=="MEUS PARCEIROS"){
+         this.ts.getParceirosListUsr(this, this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0], "*");
       }
     }
   }
