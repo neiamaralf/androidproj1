@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild ,OnInit, OnDestroy} from '@angular/core';
 import {
   ModalController, AlertController, NavController, Platform, NavParams, Content,
   ActionSheetController, ToastController, LoadingController, Loading
@@ -11,17 +11,21 @@ import { File } from '@ionic-native/file';
 import { Transfer, TransferObject } from '@ionic-native/transfer';
 import { FilePath } from '@ionic-native/file-path';
 import { Camera } from '@ionic-native/camera';
+import {Subscription} from "rxjs";
+import {TimerObservable} from "rxjs/observable/TimerObservable";
+
 declare var cordova: any;
 export class DBData {
   constructor() {
     this.items = [];
     this.show=false;
+   
   }
   public show:boolean;
   public items: Array<{
     cor?: number, title: string, id: number, show: boolean,
     menuitems: Array<{
-      title: string, tipo: number, showdados: boolean, showeditbutton: boolean,
+      title: string, tipo: number, showdados: boolean, showeditbutton: boolean,tabela?:string,
       linhas: Array<{
         title: string,
         info: string,
@@ -57,7 +61,7 @@ export class DBData {
   selector: 'page-principal',
   templateUrl: 'principal.html'
 })
-export class Principal {
+export class Principal  implements OnDestroy{
   lastImage: string = null;
   loading: Loading;
   @ViewChild('con1') cont: Content;
@@ -69,7 +73,9 @@ export class Principal {
   offset: number = 0;
   offset2: number = 0;
   offset3: number = 0;
-  cansearchProd: boolean = false;
+  cansearchProd: boolean = false;  
+    private subscription: Subscription;
+
   constructor(public platform: Platform, public navCtrl: NavController, public ts: TarefaService, public navParams: NavParams,
     public modalCtrl: ModalController, private camera: Camera,
     private transfer: Transfer, private file: File, private filePath: FilePath, public actionSheetCtrl: ActionSheetController,
@@ -182,6 +188,16 @@ export class Principal {
       }
       setTimeout(() => { this.cont.resize(); }, 500);
     }, 500);
+     let timer = TimerObservable.create(2000, 3000);
+        this.subscription = timer.subscribe(t => {
+            console.log(t);
+        });
+  }
+
+  
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
 
@@ -191,9 +207,9 @@ export class Principal {
         var url = "http://www.athena3d.com.br/bioatest/uploadimage.php";
         var newfilename = this.createFileName();
         var targetPath = this.lastImage;
-        var tabela=linha.title.toLowerCase();
-        if(tabela=="imagem")//consertar....chuncho
-         tabela="produtos";
+        var tabela=menuitem.tabela;//linha.title.toLowerCase();
+        //if(tabela=="imagem")//consertar....chuncho
+        // tabela="produtos";
         var options = {
           fileKey: "file",
           fileName: newfilename,
@@ -232,10 +248,11 @@ export class Principal {
 
   deletaImagem(menuitem, linha) {
     var title=linha.title.toLowerCase();
-    if(title=="minhas imagens")
+    this.ts.tabela=menuitem.tabela;
+  /*  if(title=="minhas imagens")
      this.ts.tabela="userimages";
     else  if(title=="imagem")
-     this.ts.tabela="produtos";
+     this.ts.tabela="produtos";*/
     this.ts.deleteIMG(this,menuitem, linha);
   }
 
@@ -246,7 +263,9 @@ export class Principal {
       sourceType: sourceType,
       saveToPhotoAlbum: false,
       correctOrientation: true,
-      destinationType: this.camera.DestinationType.FILE_URI,
+      destinationType: this.camera.DestinationType.DATA_URL,
+      
+        encodingType: this.camera.EncodingType.JPEG,
       targetWidth: 150,
       targetHeight: 150
     };
@@ -255,10 +274,11 @@ export class Principal {
       console.log("imagePath:" + imagePath);
       let newFileName = this.createFileName();
       if (!this.platform.is("mobile") || this.platform.is("mobileweb")) {
-        let base64Image = //'data:image/jpeg;base64,' + 
-          imagePath;
+        let base64Image =// 'data:image/jpeg;base64,' + 
+          imagePath.replace(" ", "+");
         menuitem.dbdata.imagem = newFileName;
-        this.ts.addImagetoDB("0", "produtos", base64Image, newFileName);
+        console.log("base64Image:" + base64Image);
+        this.ts.addImagetoDB(menuitem.dbdata.id, "produtos", base64Image, newFileName);
       }
       else {
         if (this.platform.is("Win32NT") || this.platform.is("windows")) {
