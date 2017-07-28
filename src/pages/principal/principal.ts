@@ -23,14 +23,15 @@ export class DBData {
   }
   public show:boolean;
   public items: Array<{
-    cor?: number, title: string, id: number, show: boolean,
+    cor?: number, title: string, id: number, show: boolean,tabela?:string,
     menuitems: Array<{
       title: string, tipo: number, showdados: boolean, showeditbutton: boolean,tabela?:string,
       linhas: Array<{
         title: string,
         info: string,
         imagem?: string,
-        dbdata:DBData
+        dbdata:DBData,
+        tabela?:string
       }>,
       dbdata?: {
         id?: any,
@@ -85,7 +86,7 @@ export class Principal  implements OnDestroy{
 
       this.selectedItem = navParams.get('item');
       this.dbdata.items.push({
-        cor: 4, title: 'MEU BIOATEST', id: 1, show: false,
+        cor: 4, title: 'MEU BIOATEST', id: 1, show: false,tabela:"usuarios",
         menuitems: [
           {
             title: (ts.dadosUsuario.tipo == "1" || ts.dadosUsuario.tipo == "2") ? 'DADOS CADASTRAIS' : 'DADOS', tipo: 0, showdados: false,
@@ -117,7 +118,7 @@ export class Principal  implements OnDestroy{
             title: 'DADOS DE REGISTRO', tipo: 2, showdados: false, showeditbutton: false, linhas: [
               { title: 'SOBRE', info: " ",dbdata:new DBData },
               { title: 'PRODUTOS', info: " ",dbdata:new DBData  },
-              { title: 'IMAGENS', info: " ",dbdata:new DBData  }
+              { title: 'IMAGENS', info: " ",tabela:"userimages",dbdata:new DBData  }
             ]
           },
           { title: 'UPLOADS', tipo: 3, showdados: false,showeditbutton:false, linhas: [] },
@@ -145,7 +146,7 @@ export class Principal  implements OnDestroy{
           ]
         });
         this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items.push({
-          cor: 2, title: 'LISTAPRODUTOS', id: 1, show: false,menuitems: []
+          cor: 2, title: 'LISTAPRODUTOS', id: 1, show: false,tabela:"listaprodutos",menuitems: []
         });
         this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items.push({
           cor: 2, title: 'MINHAS IMAGENS', id: 1, show: false,menuitems: []
@@ -160,7 +161,7 @@ export class Principal  implements OnDestroy{
             { title: 'PONTOS DE VENDA', info: " ", dbdata: new DBData }
           );
           this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items.push({
-            cor: 2, title: 'MEUS PARCEIROS', id: 1, show: false, menuitems: []
+            cor: 2, title: 'MEUS PARCEIROS', id: 1, show: false,tabela:"parceiros", menuitems: []
           });
           ts.getParceirosListUsr(this, this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0], "*");
 
@@ -178,13 +179,13 @@ export class Principal  implements OnDestroy{
         this.dbdata.items.push({ cor: 1, title: 'PROMOÇÕES DE HOJE', id: 7, show: false, menuitems: [] });
       }
       if (ts.dadosUsuario.tipo == "3") {
-        this.dbdata.items.push({ cor: 4, title: 'CERTIFICADORAS', id: 8, show: false, menuitems: [] });
+        this.dbdata.items.push({ cor: 4, title: 'CERTIFICADORAS', id: 8, show: false,tabela:"certificadoras", menuitems: [] });
         ts.getCertList(this.dbdata.items[1]);
-        this.dbdata.items.push({ cor: 4, title: 'CATEGORIAS', id: 9, show: false, menuitems: [] });
+        this.dbdata.items.push({ cor: 4, title: 'CATEGORIAS', id: 9, show: false,tabela:"categorias", menuitems: [] });
         ts.getCategoriasList(this.dbdata.items[2]);
-        this.dbdata.items.push({ cor: 4, title: 'MARCAS', id: 10, show: false, menuitems: [] });
+        this.dbdata.items.push({ cor: 4, title: 'MARCAS', id: 10, show: false,tabela:"marcas", menuitems: [] });
         ts.getMarcasList(this.dbdata.items[3]);
-        this.dbdata.items.push({ cor: 4, title: 'PRODUTOS', id: 11, show: false, menuitems: [] });
+        this.dbdata.items.push({ cor: 4, title: 'PRODUTOS', id: 11, show: false,tabela:"produtos", menuitems: [] });
       }
       setTimeout(() => { this.cont.resize(); }, 500);
     }, 500);
@@ -207,9 +208,7 @@ export class Principal  implements OnDestroy{
         var url = "http://www.athena3d.com.br/bioatest/uploadimage.php";
         var newfilename = this.createFileName();
         var targetPath = this.lastImage;
-        var tabela=menuitem.tabela;//linha.title.toLowerCase();
-        //if(tabela=="imagem")//consertar....chuncho
-        // tabela="produtos";
+        var tabela=menuitem.tabela;
         var options = {
           fileKey: "file",
           fileName: newfilename,
@@ -232,11 +231,11 @@ export class Principal  implements OnDestroy{
           }, 500)
 
           this.presentToast('Imagem enviada com sucesso.');
-          if(tabela=="imagens"){
-          this.offset2=0;
-          this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0].menuitems=[];
-          this.ts.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
-        }
+          if (tabela == "userimages") {
+            this.offset2 = 0;
+            this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0].menuitems = [];
+            this.ts.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
+          }
           
         }, err => {
           this.loading.dismissAll();
@@ -247,12 +246,7 @@ export class Principal  implements OnDestroy{
   }
 
   deletaImagem(menuitem, linha) {
-    var title=linha.title.toLowerCase();
     this.ts.tabela=menuitem.tabela;
-  /*  if(title=="minhas imagens")
-     this.ts.tabela="userimages";
-    else  if(title=="imagem")
-     this.ts.tabela="produtos";*/
     this.ts.deleteIMG(this,menuitem, linha);
   }
 
@@ -269,16 +263,14 @@ export class Principal  implements OnDestroy{
       targetWidth: 150,
       targetHeight: 150
     };
-
+    console.log(menuitem);
     this.camera.getPicture(options).then((imagePath) => {
-      console.log("imagePath:" + imagePath);
+      
       let newFileName = this.createFileName();
       if (!this.platform.is("mobile") || this.platform.is("mobileweb")) {
-        let base64Image =// 'data:image/jpeg;base64,' + 
-          imagePath.replace(" ", "+");
+        let base64Image =imagePath.replace(" ", "+");
         menuitem.dbdata.imagem = newFileName;
-        console.log("base64Image:" + base64Image);
-        this.ts.addImagetoDB(menuitem.dbdata.id, "produtos", base64Image, newFileName);
+        this.ts.addImagetoDB(menuitem.dbdata.id,this, menuitem.tabela, base64Image, newFileName);
       }
       else {
         if (this.platform.is("Win32NT") || this.platform.is("windows")) {
@@ -293,7 +285,7 @@ export class Principal  implements OnDestroy{
               let correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
               let currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
               this.lastImage = correctPath + currentName;
-              if(this.ts.tabela=="produtos")
+              if(menuitem.tabela=="produtos")
                this.deletaImagem(menuitem, linha);
               this.uploadImage(menuitem, linha);
             });
@@ -302,7 +294,7 @@ export class Principal  implements OnDestroy{
           var currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
           var correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
           this.lastImage = correctPath + currentName;
-          if (this.ts.tabela == "produtos")
+          if (menuitem.tabela == "produtos")
             this.deletaImagem(menuitem, linha);
           this.uploadImage(menuitem, linha);
         }
@@ -486,9 +478,6 @@ export class Principal  implements OnDestroy{
   } 
 
   deleteEntry(event, item, menuitem) {
-    this.ts.tabela = item.title.toLowerCase();
-    if(this.ts.tabela=="minhas imagens")
-     this.ts.tabela="userimages";
     let alert = this.alertCtrl.create({
       title: 'Confirmar exclusão',
       message: 'Tem certeza que quer excluir ' + menuitem.title + '?',
@@ -509,8 +498,6 @@ export class Principal  implements OnDestroy{
 
     });
     alert.present();
-
-
     event.stopPropagation();
   }
 

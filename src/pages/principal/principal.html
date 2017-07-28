@@ -109,7 +109,7 @@
                                                 <button *ngIf="itemlinha.title=='MINHAS IMAGENS'" ion-button item-right color="danger" icon-only clear (click)="deletaImagem(list, itemlinha)">
                                                  <ion-icon name="trash" ></ion-icon>
                                                 </button>
-                                                <button *ngIf="itemlinha.title=='MEUS PARCEIROS'" ion-button item-right color="danger" icon-only clear (click)="deletaImagem(list, itemlinha)">
+                                                <button *ngIf="itemlinha.title=='MEUS PARCEIROS'" ion-button item-right color="danger" icon-only clear (click)="deleteEntry($event, itemlinha, list)">
                                                  <ion-icon name="trash" ></ion-icon>
                                                 </button>
                                             </ion-item>

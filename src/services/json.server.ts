@@ -109,6 +109,15 @@ export class HtmlWrapper {
         });
     }
 
+    dopostusrid(callback) {
+        this.httpowner.storage.ready().then(() => {
+            this.httpowner.storage.get('userid').then((idusuario) => {
+                this.bodyparams.add("idusuario", idusuario);
+                this.dopost(callback);
+            });
+        });
+    }
+
     sendNotification(message): void {
         let notification = this.httpowner.toastCtrl.create({ message: message, duration: 3000 });
         notification.present();
@@ -136,7 +145,6 @@ export class TarefaService  {
     public searchbar: boolean = false;
     public storage: Storage = new Storage();
     public footer: string = "";
-    private baseURI: string = "http://www.athena3d.com.br/bioatest/";
     public mostraCep: boolean = false;
     public hideForm: boolean = false;
     public isEdited: boolean = false;
@@ -330,6 +338,7 @@ export class TarefaService  {
 
     deleteEntry(principal, item, userid, formvariables) {
         var name: string = formvariables.nome;
+        this.tabela=item.tabela;
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "delete");
         htmlwrapper.bodyparams.add("recordID", userid);
@@ -356,6 +365,11 @@ export class TarefaService  {
                     principal.offset2 = 0;
                     item.menuitems = [];
                     ts.sendNotification(`Imagem excluída com sucesso!`);
+                }
+                else if (ts.tabela == "parceiros") {
+                    principal.offset3 = 0;
+                    item.menuitems = [];
+                    ts.sendNotification(`Ponto de venda excluído com sucesso!`);
                 }
                 principal.updatemenuitemslist(item);
             }
@@ -495,15 +509,22 @@ export class TarefaService  {
         });
     }
 
-    addImagetoDB(id, tabela, imgdata, fnome) {
+    addImagetoDB(id,principal, tabela, imgdata, fnome) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "salvaimagem");
-        htmlwrapper.bodyparams.add("recordID", id);
+        htmlwrapper.bodyparams.add("id", id);
         htmlwrapper.bodyparams.add("tabela", tabela);
         htmlwrapper.bodyparams.add("imgdata", encodeURIComponent(imgdata));
         htmlwrapper.bodyparams.add("fnome", fnome);
-        htmlwrapper.dopost(function (ts, data) {
-            if (data.insert === "ok") ts.sendNotification(`Imagem enviada com sucesso!`);
+        htmlwrapper.dopostusrid(function (ts, data) {
+            if (data.insert === "ok"){
+                 ts.sendNotification(`Imagem enviada com sucesso!`);
+                 if (tabela == "userimages") {
+                     principal.offset2 = 0;
+                     principal.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0].menuitems = [];
+                     this.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
+                 }
+            }
             else ts.sendNotification('Algo deu errado! Tente novamente.');
         });        
     }
@@ -641,7 +662,7 @@ export class TarefaService  {
             if (data[0].nome != "null") {
                 data.forEach(row => {
                     mn.menuitems.push({
-                        title: row.nome, tipo: row.id, showdados: _showdados, showeditbutton: true, linhas: [
+                        title: row.nome, tipo: row.id, showdados: _showdados, showeditbutton: true,tabela:"produtos", linhas: [
                             { title: 'NOME', info: row.nome, dbdata: null },
                             { title: 'MARCA', info: row.marca, dbdata: null },
                             { title: 'CATEGORIA', info: row.categoria, dbdata: null },
