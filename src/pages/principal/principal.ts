@@ -67,6 +67,7 @@ export class Principal  implements OnDestroy{
   loading: Loading;
   @ViewChild('con1') cont: Content;
   selectedItem: any;
+  tipobuscaproduto:string="0";
   hasabaaberta: boolean = false;
   menubuttons: string[];
   dbdata: DBData = new DBData();
