@@ -1,4 +1,4 @@
-import { Injectable, OnInit, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import { Storage } from '@ionic/storage';
 import { TextToSpeech } from '@ionic-native/text-to-speech';
@@ -6,9 +6,7 @@ import { SpeechRecognition } from '@ionic-native/speech-recognition';
 import { AlertController, ToastController, Platform } from 'ionic-angular';
 
 
-//import { Facebook, FacebookLoginResponse } from '@ionic-native/facebook';
-
-export class DadosUsuario {
+export  class DadosUsuario {
     public nome: string = "";
     public email: string = "";
     public endereco: string = "";
@@ -28,7 +26,7 @@ export class DadosUsuario {
     public imagem?: string
 }
 
-export class BodyParams {
+class BodyParams {
     constructor() {
         this.params = [];
     }
@@ -182,16 +180,16 @@ export class TarefaService  {
         notification.present();
     }
 
-    async getfala() {
+   /* async*/ getfala() {
         this.speechRecognition.startListening({
             language: 'pt-BR', matches: 1, prompt: ""/*Android only*/, showPopup: true/*Android only*/, showPartial: false/*iOS only */
         }).
             subscribe((matches: Array<string>) => this.speechtext = matches[0], (onerror) => this.sendNotification('erro:' + onerror))
     }
 
-    async falatexto(): Promise<any> {
+    /*async*/ falatexto(): Promise<any> {
         try {
-            await this.tts.speak({ text: this.speechtext, locale: 'pt-BR', rate: 0.75 });
+            /*await*/return this.tts.speak({ text: this.speechtext, locale: 'pt-BR', rate: 0.75 });
         }
         catch (e) {
 
@@ -283,7 +281,10 @@ export class TarefaService  {
     }
 
     constroiendereco(formvariables) {
-        return formvariables.endereco + ',' + formvariables.numero + '-' + formvariables.complemento + '-' + formvariables.bairro + '-'
+        var complemento:string="-";
+        if (formvariables.complemento != "null")
+            complemento = complemento + formvariables.complemento + "-";
+        return formvariables.endereco + ',' + formvariables.numero + complemento + formvariables.bairro + '-'
             + formvariables.cidade + '-' + formvariables.estado + '-' + formvariables.cep;
     }
 
@@ -370,6 +371,10 @@ export class TarefaService  {
                     principal.offset3 = 0;
                     item.menuitems = [];
                     ts.sendNotification(`Ponto de venda excluído com sucesso!`);
+                }
+                else if (ts.tabela == "certusr") {
+                    item.menuitems = [];
+                    ts.sendNotification(`A certificadora foi excluída!`);
                 }
                 principal.updatemenuitemslist(item);
             }
@@ -483,13 +488,39 @@ export class TarefaService  {
         });
     }
 
+    insertUsrcertLista(principal, item, menuitems) {
+        this.storage.ready().then(() => {
+            this.storage.get('userid').then((idusuario) => {
+                let jsonlist: Array<{ idcert: number }> = [];
+                menuitems.forEach(mn => {
+                    if (mn.showdados)
+                        jsonlist.push({ idcert: mn.dbdata.id })
+                });
+                var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+                htmlwrapper.bodyparams.add("key", "insusrcertlist");
+                htmlwrapper.bodyparams.add("idusuario", idusuario);
+                htmlwrapper.bodyparams.add("json", JSON.stringify(jsonlist));
+                htmlwrapper.dopost(function (ts, data) {
+                    if (data.insert === "ok") {
+                        ts.sendNotification(jsonlist.length + ' certificadora(s) inseridas com sucesso!');
+                        principal.offset3 = 0;
+                        principal.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0].menuitems = [];
+                        principal.updatemenuitemslist(principal.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0]);
+                    }
+                    else
+                        ts.sendNotification('Algo deu errado! ' + data.insert);
+                });
+            });
+        });
+    }
+
     insertProdLista(principal, item, menuitems) {        
         this.storage.ready().then(() => {
             this.storage.get('userid').then((idusuario) => {
-                let jsonlist: Array<{ idproduto: number, preco: number }> = [];
+                let jsonlist: Array<{ idproduto: number, preco: number,descricao:string }> = [];
                 menuitems.forEach(mn => {
                     if (mn.showdados)
-                        jsonlist.push({ idproduto: mn.dbdata.id, preco: mn.dbdata.preco })
+                        jsonlist.push({ idproduto: mn.dbdata.id, preco: mn.dbdata.preco, descricao: mn.dbdata.descricao  })
                 });
                 var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
                 htmlwrapper.bodyparams.add("key", "insprodlist");
@@ -652,6 +683,49 @@ export class TarefaService  {
         });
     }
 
+    getCertListUsr(page: any, mn: any, categoria: any) {
+        var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+        htmlwrapper.bodyparams.add("key", "getcertlistusr");
+        htmlwrapper.dogetusrid(function (ts, data) {
+            if (data[0].id != "null") {
+                data.forEach(row => {
+                    mn.menuitems.push({
+                        title: row.nome, tipo: row.id, showdados: false, linhas: [],
+                        dbdata: {
+                            nome: row.nome,
+                            id: row.id,
+                            imagem: row.imagem
+                        }
+                    });
+                });
+                page.offset3 += page.limit;
+            }
+        });
+    }
+
+    getCertListUsrId(page: any, mn: any, idusr: any) {
+        var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+        htmlwrapper.bodyparams.add("key", "getcertlistusr");
+        htmlwrapper.bodyparams.add("idusuario", idusr);
+        
+        htmlwrapper.doget(function (ts, data) {
+            if (data[0].id != "null") {
+                data.forEach(row => {
+                    mn.menuitems.push({
+                        title: row.nome, tipo: row.id, showdados: false, linhas: [],
+                        dbdata: {
+                            nome: row.nome,
+                            id: row.id,
+                            site: row.site,
+                            imagem: row.imagem
+                        }
+                    });
+                });
+                page.offset3 += page.limit;
+            }
+        });
+    }
+
     getProdList(page: any, mn: any, categoria: any, _showdados: boolean) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "prodlist");
@@ -680,6 +754,66 @@ export class TarefaService  {
                 page.offset += page.limit;
             }
             else page.cansearchProd = false;
+        });            
+    }
+
+     getSearchByProd(page: any) {
+        var mn:any= page.dbdata.items[0];
+        var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+        htmlwrapper.bodyparams.add("key", "searchbyprod");
+        htmlwrapper.bodyparams.add("nome", page._searchbar.value);
+        htmlwrapper.bodyparams.add("offset", page.offset);
+        htmlwrapper.bodyparams.add("limit", page.limit);
+        htmlwrapper.doget(function (ts, data) {
+            if (data[0].nome != "null") {
+                data.forEach(row => {
+                    mn.menuitems.push({
+                        title: row.nome, linhas: [ ],
+                        dbdata: {
+                            id: row.id,
+                            nome: row.nome,
+                            idmarca: row.idmarca,
+                            idcategoria: row.idcategoria,
+                            imagem: row.imagem
+                        }
+                    });
+                });
+                page.offset += page.limit;
+            }           
+        });            
+    }
+
+    getPvByProduto(page: any) {
+        var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+        htmlwrapper.bodyparams.add("key", page.resdata.tipobusca);
+        htmlwrapper.bodyparams.add("idprod", page.item.dbdata.id);
+        htmlwrapper.bodyparams.add("offset", page.offset);
+        htmlwrapper.bodyparams.add("limit", page.limit);
+       
+        htmlwrapper.doget(function (ts, data) {
+            if (data[0].nome != "null") {
+                data.forEach(row => {
+                    page.resdata.currarray.push({
+                        pimg: row.pimg,
+                        preco: row.preco,
+                        lpimg: row.lpimg,
+                        nomeprod: row.nomeprod,
+                        id: row.id,
+                        nome: row.nome,
+                        endereco: row.endereco,
+                        numero: row.numero,
+                        complemento: row.complemento,
+                        bairro: row.bairro,
+                        cidade: row.cidade,
+                        estado: row.estado,
+                        cep: row.cep,
+                        fone: row.fone,
+                        tipo: row.tipo
+
+                    });
+                });                
+                page.offset += page.limit;
+            }           
         });            
     }
 
@@ -714,7 +848,7 @@ export class TarefaService  {
     getCertList(mn: any) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "cert");
-        htmlwrapper.doget(function (ts, data) {
+        htmlwrapper.dogetusrid(function (ts, data) {
             mn.menuitems = [];
             if (data[0].nome != "null") {
                 data.forEach(row => {

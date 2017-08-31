@@ -46,6 +46,21 @@
           echo '[{"id":"null"}]';
        }
        break;
+       case 'searchbyprod':
+        $sql="SELECT prod.id,prod.nome,prod.imagem,prod.idcategoria,prod.idmarca FROM produtos as prod WHERE  prod.nome LIKE '".$_REQUEST['nome']."%' ORDER BY prod.nome LIMIT ".$_REQUEST['limit']." OFFSET ".$_REQUEST['offset'];
+        $stmt 	= $pdo->query($sql);
+        if($stmt->rowCount()>0 ){
+         while($row  = $stmt->fetch(PDO::FETCH_OBJ))      {
+          // if($row->nome!="null")
+          $data[] = $row;
+         }    
+         mb_convert_variables('UTF-8', 'ISO-8859-1', $data);
+         echo json_encode($data);
+       }
+       else{
+          echo '[{"nome":"null"}]';
+       }
+       break;
         case 'getimgslist':
         $idusuario=$_REQUEST['idusuario'];
         $sql="SELECT * FROM userimages WHERE idusuario=$idusuario ORDER BY id LIMIT ".$_REQUEST['limit']." OFFSET ".$_REQUEST['offset'];

@@ -11,7 +11,5 @@ export class HomePage {
   constructor( public tarefaService: TarefaService) {
    
   
-  }
-
-  
+  }  
 }

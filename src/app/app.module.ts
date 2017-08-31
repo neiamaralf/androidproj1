@@ -5,12 +5,13 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { BioatestApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { BuscaCEPPage } from '../pages/buscacep/buscacep';
-import { Principal } from '../pages/principal/principal';
+import { Principal,PopoverPage } from '../pages/principal/principal';
 import { Page3 } from '../pages/page3/page3';
 import { newNavbar} from '../pages/cabecalho/cabecalho';
 import { Rodape } from '../pages/rodape/rodape'
-import { TarefaService} from '../services/json.server';
+import { DadosUsuario,TarefaService} from '../services/json.server';
 import { CadastroPage } from '../pages/cadastrologin/cadastrologin';
+import { PaginaResultado,CertUsrDlg} from '../pages/buscas/resultado';
 import {TextToSpeech} from '@ionic-native/text-to-speech';
 import { SpeechRecognition } from '@ionic-native/speech-recognition';
 import { File } from '@ionic-native/file';
@@ -24,12 +25,15 @@ import { ListaPage } from '../pages/listaprodutos/listaprodutos';
     BioatestApp,
     HomePage,
     Principal, 
+    PopoverPage,
     Page3,
     newNavbar,
     Rodape,
     CadastroPage,
     BuscaCEPPage,
-    ListaPage
+    ListaPage,
+    PaginaResultado,
+    CertUsrDlg
   ],
   imports: [
     IonicModule.forRoot(BioatestApp),ElasticModule
@@ -39,12 +43,15 @@ import { ListaPage } from '../pages/listaprodutos/listaprodutos';
     BioatestApp,
     HomePage,
     Principal,
+    PopoverPage,
     Page3,
     newNavbar,
     Rodape,
     CadastroPage,
     BuscaCEPPage,
-    ListaPage
+    ListaPage ,
+    PaginaResultado,
+    CertUsrDlg
   ],
   providers: [
     SpeechRecognition,
@@ -57,7 +64,7 @@ import { ListaPage } from '../pages/listaprodutos/listaprodutos';
     Transfer,
     Camera,
     FilePath,
-    TarefaService,
+    DadosUsuario,TarefaService,
     {provide: ErrorHandler, useClass: IonicErrorHandler}]
 })
 export class AppModule {}

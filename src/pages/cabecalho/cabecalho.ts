@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { Searchbar, NavController } from 'ionic-angular';
 import { TarefaService } from '../../services/json.server';
 import { ViewChild } from '@angular/core';
-import { HomePage } from '../../pages/home/home';
 import { CadastroPage } from '../../pages/cadastrologin/cadastrologin';
 import { Principal } from '../../pages/principal/principal';
 

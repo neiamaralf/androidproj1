@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 
-import { DadosUsuario, TarefaService } from '../../services/json.server';
+import {  TarefaService } from '../../services/json.server';
 import { DBData } from '../principal/principal';
 
 @Component({
@@ -30,6 +30,8 @@ export class ListaPage {
      this.ts.getProdList(this, this.dbdata.items[0], "*", this.selAll);
    else if (this.alvo == "parceiros")
      this.ts.getParceirosList(this, this.dbdata.items[0], "*", this.selAll);
+   else if (this.alvo == "certusr")
+     this.ts.getCertList( this.dbdata.items[0]);
  }
 
  chkSelTudoClick(event) {
@@ -65,6 +67,8 @@ export class ListaPage {
      this.ts.insertProdLista(this.principal, this.dbdata.items[0], this.dbdata.items[0].menuitems);
    else if (this.alvo == "parceiros")
      this.ts.insertParceiroLista(this.principal, this.dbdata.items[0], this.dbdata.items[0].menuitems);
+   else if (this.alvo == "certusr")
+     this.ts.insertUsrcertLista(this.principal, this.dbdata.items[0], this.dbdata.items[0].menuitems);
    this.dismiss();
  }
 

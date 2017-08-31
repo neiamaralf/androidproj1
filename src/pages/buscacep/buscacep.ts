@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
-import { ModalController, Platform, NavParams, ViewController } from 'ionic-angular';
+import {  NavParams, ViewController } from 'ionic-angular';
 import { TarefaService } from '../../services/json.server';
 
 @Component({

@@ -1,10 +1,12 @@
-import { Component, ViewChild ,OnInit, OnDestroy} from '@angular/core';
+import { Component, ViewChild , OnDestroy} from '@angular/core';
 import {
-  ModalController, AlertController, NavController, Platform, NavParams, Content,
-  ActionSheetController, ToastController, LoadingController, Loading
+  ViewController,ModalController, AlertController, NavController, Platform, NavParams, Content,
+  ActionSheetController, ToastController, LoadingController, Loading,Searchbar
 } from 'ionic-angular';
 import { DadosUsuario, TarefaService } from '../../services/json.server';
 import { CadastroPage } from '../cadastrologin/cadastrologin';
+
+import { PaginaResultado } from '../buscas/resultado';
 import { ListaPage } from '../listaprodutos/listaprodutos';
 
 import { File } from '@ionic-native/file';
@@ -23,9 +25,9 @@ export class DBData {
   }
   public show:boolean;
   public items: Array<{
-    cor?: number, title: string, id: number, show: boolean,tabela?:string,
+    cor?: number, title?: string, id?: number, show?: boolean,tabela?:string,
     menuitems: Array<{
-      title: string, tipo: number, showdados: boolean, showeditbutton: boolean,tabela?:string,
+      title: string, tipo?: number, showdados?: boolean, showeditbutton?: boolean,tabela?:string,
       linhas: Array<{
         title: string,
         info: string,
@@ -53,11 +55,94 @@ export class DBData {
         idproduto?: any,
         idcategoria?: any,
         imagem?: string,
+        descricao?: string,
         preco?:number
       }
     }>
   }>;
 }
+
+@Component({
+  template: `
+  <ion-header>
+   <ion-toolbar color="cor1">
+        <ion-title>
+            Buscar
+        </ion-title>
+        <ion-buttons start>
+            <button ion-button (click)="close(null)">
+                  <span ion-text color="primary" showWhen="ios">Cancelar</span>
+                  <ion-icon name="md-close" ></ion-icon>
+                </button>
+        </ion-buttons>
+    </ion-toolbar>
+     <ion-grid no-padding>
+        <ion-row  align-items-center justify-content-center>
+            <ion-col col-8>
+             <ion-searchbar #sb placeholder="Buscar"  [(ngModel)]="sbvalue" (ionInput)="getItems($event)"></ion-searchbar>
+            </ion-col>
+             <ion-col col-4>
+            <button ion-button icon-only clear (click)="getmic($event)"><ion-icon name="microphone" color="danger" ></ion-icon></button>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+   
+   
+   
+  </ion-header>
+  <ion-content ion-scroll>
+ 
+    <ion-list>
+    
+      <button ion-item *ngFor="let item of dbdata.items[0].menuitems" (click)="close(item)">{{item.title}}</button>     
+    </ion-list>
+     <ion-infinite-scroll  (ionInfinite)="$event.waitFor(populate())">
+            <ion-infinite-scroll-content></ion-infinite-scroll-content>
+        </ion-infinite-scroll>
+    </ion-content>
+  `
+})
+export class PopoverPage {
+  @ViewChild('sb') _searchbar: Searchbar;
+  dbdata: DBData = new DBData();
+  public sbvalue:string;
+  limit: number = 10;
+  offset: number = 0;
+  constructor(public viewCtrl: ViewController) {
+    this.sbvalue="";
+    this.dbdata.items.push({  menuitems: [] });
+     setTimeout(() => {
+       if(this._searchbar!=undefined)
+        this._searchbar.setFocus();
+      }, 150);
+  }
+
+  populate(): Promise<any> {
+     return new Promise((resolve) => {
+        setTimeout(() => {
+          this.viewCtrl.data.principal.ts.getSearchByProd(this);
+          resolve();
+          this.viewCtrl.getContent().resize();
+        }, 500);
+      });   
+  }
+
+  close(item) {
+    this.viewCtrl.dismiss().then(() => {
+      if (item != null) {
+       this.viewCtrl.data.principal.navCtrl.push(PaginaResultado,{item:item,tipobusca:this.viewCtrl.data.tipobusca});
+      }
+    })
+
+  }
+
+  getItems(event){
+    this.offset=0;
+    this.dbdata.items[0].menuitems=[];
+   this.populate();
+  }
+}
+
 @Component({
   selector: 'page-principal',
   templateUrl: 'principal.html'
@@ -67,7 +152,7 @@ export class Principal  implements OnDestroy{
   loading: Loading;
   @ViewChild('con1') cont: Content;
   selectedItem: any;
-  tipobuscaproduto:string="0";
+  tipobuscaproduto:string="porproduto";
   hasabaaberta: boolean = false;
   menubuttons: string[];
   dbdata: DBData = new DBData();
@@ -75,8 +160,22 @@ export class Principal  implements OnDestroy{
   offset: number = 0;
   offset2: number = 0;
   offset3: number = 0;
-  cansearchProd: boolean = false;  
-    private subscription: Subscription;
+  cansearchProd: boolean = false;
+  private subscription: Subscription;
+
+  presentPopover(myEvent) {
+    let popover = this.modalCtrl.create(PopoverPage, {principal:this,tipobusca:this.tipobuscaproduto});
+    popover.present({
+      ev: myEvent
+    });
+    popover.onDidDismiss((popoverData) => {
+     
+    })
+  }
+
+  getItems(event) {
+    this.presentPopover(event);
+  }
 
   constructor(public platform: Platform, public navCtrl: NavController, public ts: TarefaService, public navParams: NavParams,
     public modalCtrl: ModalController, private camera: Camera,
@@ -147,11 +246,13 @@ export class Principal  implements OnDestroy{
           ]
         });
         this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items.push({
-          cor: 2, title: 'LISTAPRODUTOS', id: 1, show: false,tabela:"listaprodutos",menuitems: []
+          cor: 2, title: 'MEUS PRODUTOS', id: 1, show: false,tabela:"listaprodutos",menuitems: []
         });
         this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items.push({
           cor: 2, title: 'MINHAS IMAGENS', id: 1, show: false,menuitems: []
         });
+       
+        
         ts.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
         ts.getProdListUsr(this, this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items[0], "*");
         ts.getInfoUsuario(this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items[0],
@@ -159,12 +260,20 @@ export class Principal  implements OnDestroy{
         this.dbdata.items[0].menuitems[1].linhas[0].dbdata.items[2]);
         if (ts.dadosUsuario.tipo == "2") {
           this.dbdata.items[0].menuitems[1].linhas.push(
-            { title: 'PONTOS DE VENDA', info: " ", dbdata: new DBData }
+            { title: 'CERTIFICADORAS', info: " ", tabela: "certusr", dbdata: new DBData }
           );
           this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items.push({
-            cor: 2, title: 'MEUS PARCEIROS', id: 1, show: false,tabela:"parceiros", menuitems: []
+            cor: 2, title: 'MINHAS CERTIFICAÇÕES', id: 1, tabela: "certusr", show: false, menuitems: []
           });
-          ts.getParceirosListUsr(this, this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0], "*");
+          ts.getCertListUsr(this, this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0], "*");
+
+          this.dbdata.items[0].menuitems[1].linhas.push(
+            { title: 'PONTOS DE VENDA', info: " ", dbdata: new DBData }
+          );
+          this.dbdata.items[0].menuitems[1].linhas[4].dbdata.items.push({
+            cor: 2, title: 'MEUS PARCEIROS', id: 1, show: false, tabela: "parceiros", menuitems: []
+          });
+          ts.getParceirosListUsr(this, this.dbdata.items[0].menuitems[1].linhas[4].dbdata.items[0], "*");
 
         }
       }
@@ -386,7 +495,7 @@ export class Principal  implements OnDestroy{
   populateListParceirosUsr(): Promise<any> {
      return new Promise((resolve) => {
         setTimeout(() => {
-          this.ts.getParceirosListUsr(this, this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0], "*");
+          this.ts.getParceirosListUsr(this, this.dbdata.items[0].menuitems[1].linhas[4].dbdata.items[0], "*");
           resolve();
         }, 500);
       });   
@@ -478,6 +587,12 @@ export class Principal  implements OnDestroy{
       event.stopPropagation();
   } 
 
+  addusrcert(event,linha){
+     let modal = this.modalCtrl.create(ListaPage, {alvo:"certusr",principal: this, item: linha });
+      modal.present();
+      event.stopPropagation();
+  } 
+
   deleteEntry(event, item, menuitem) {
     let alert = this.alertCtrl.create({
       title: 'Confirmar exclusão',
@@ -519,15 +634,19 @@ export class Principal  implements OnDestroy{
           this.populateListProd();
           break;
       }
-      if(item.title=="LISTAPRODUTOS"){
+      if(item.title=="MEUS PRODUTOS"){
          this.ts.getProdListUsr(this, this.dbdata.items[0].menuitems[1].linhas[1].dbdata.items[0], "*");
       }
       else if(item.title=="MINHAS IMAGENS"){
          this.ts.getImgsListUsr(this, this.dbdata.items[0].menuitems[1].linhas[2].dbdata.items[0], "*");
       }
       else if(item.title=="MEUS PARCEIROS"){
-         this.ts.getParceirosListUsr(this, this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0], "*");
+         this.ts.getParceirosListUsr(this, this.dbdata.items[0].menuitems[1].linhas[4].dbdata.items[0], "*");
       }
+      else if(item.title=="MINHAS CERTIFICAÇÕES"){
+         this.ts.getCertListUsr(this, this.dbdata.items[0].menuitems[1].linhas[3].dbdata.items[0], "*");
+      }
+     
     }
   }
 
@@ -561,8 +680,9 @@ export class Principal  implements OnDestroy{
       if(item.id==8||item.id==9||item.id==10||item.id==11)
       item.menuitems = [];
     }
-    else
+    else{
       this.updatemenuitemslist(item);
+    }
 
 
     this.hasabaaberta = item.show;

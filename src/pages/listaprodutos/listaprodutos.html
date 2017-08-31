@@ -3,15 +3,12 @@
         <ion-title>
             ADICIONAR {{item.title}}
         </ion-title>
-
-
         <ion-buttons start>
             <button ion-button (click)="dismiss()">
                   <span ion-text color="primary" showWhen="ios">Cancelar</span>
                   <ion-icon name="md-close" ></ion-icon>
                 </button>
         </ion-buttons>
-
     </ion-toolbar>
     <ion-item color="cor1">
         <ion-checkbox color="danger" [(ngModel)]="selAll" (click)="chkSelTudoClick($event)"></ion-checkbox>
@@ -30,6 +27,7 @@
                     <img src="http://athena3d.com.br/bioatest/imagens/{{item.dbdata.imagem}}">
                 </ion-thumbnail>
             </ion-item>
+            <ion-input *ngIf="alvo == 'produtos'" type="text" placeholder="Descrição" [(ngModel)]="item.dbdata.descricao"></ion-input>
             <ion-input *ngIf="alvo == 'produtos'" type="text" placeholder="Preço" [(ngModel)]="item.dbdata.preco"></ion-input>
             <ion-item-divider color="light"></ion-item-divider>
         </ion-item-group>

@@ -1,0 +1,72 @@
+<ion-header>
+    <new-navbar hideBackButton></new-navbar>
+</ion-header>
+
+<ion-content #ct padding>
+    <ion-list>
+        <ion-list-header color="cor2">RESULTADOS
+            <p color="light" item-right>MAIS PRÓXIMOS</p>
+        </ion-list-header>
+        <ion-card>
+            <ion-card-header color="cor2">
+                {{item.dbdata.nome.toUpperCase()}}
+            </ion-card-header>
+        </ion-card>
+        <ion-item *ngFor="let res of resdata.currarray" no-padding no-margin>
+            <ion-grid no-padding>
+                <ion-row justify-content-start>
+                    <ion-col col-4>
+                        <ion-card>
+                            <img src="http://athena3d.com.br/bioatest/imagens/{{res.lpimg==null?res.pimg:res.lpimg}}">
+                        </ion-card>
+                    </ion-col>
+                    <ion-col col-8 style="text-align: left">
+                        <h2><b>{{res.nome}}</b></h2>
+                        <p><span class="infoponto"><b>Produto</b>:{{res.nomeprod!=null?res.nomeprod:item.dbdata.nome}}</span></p>
+                        <p><span class="infoponto"><b>Preço</b>:R${{res.preco}}</span></p>
+                    </ion-col>
+                </ion-row>
+                <ion-row>
+                    <ion-col col-12 style="text-align: center">
+                        <p (click)="promo()" style="color: green">Ver Promoções</p>
+                        <p (click)="pontovenda()" style="color: green">Ver Ponto de Venda</p>
+                    </ion-col>
+                </ion-row>
+                <ion-row>
+                    <ion-col col-8>
+                        <ion-card>
+                            <ion-card-content style="padding: 5pt">
+                                <p><span class="infoponto"><b >Categoria</b>:{{res.tipo=="1"?'Ponto de venda':'Produtor'}}</span></p>
+                                <p><span class="infoponto"><b >Endereço</b>:{{ts.constroiendereco(res)}}</span></p>
+                                <p><span class="infoponto"><b >Fone</b>:{{res.fone}}</span></p>
+                                <button ion-button small class="infocert" color="light" (click)="showcertificacoes($event,res)">Certiﬁcações...</button>
+                                <button ion-item class="menudir" (click)="vermapa()">VER MAPA</button>
+                            </ion-card-content>
+                        </ion-card>
+                    </ion-col>
+                    <ion-col col-4>
+                        <ion-list no-lines>
+                            <button ion-item style="text-align: right" (click)="premium()">
+                                PREMIUM
+                            </button>
+                            <button ion-item class="menudir" (click)="contatar()">
+                                CONTATAR
+                            </button>
+                            <button ion-item class="menudir" (click)="indicar()">
+                                INDICAR
+                            </button>
+                            <button ion-item class="menudir" (click)="alerta()">
+                                ALERTA
+                            </button>
+                            <button style="text-align: right" ion-item icon-right (click)="likeit()">1.109<ion-icon color="cor2" name="heart"></ion-icon></button>
+                        </ion-list>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </ion-item>
+    </ion-list>
+</ion-content>
+
+<ion-footer>
+    <page-rodape></page-rodape>
+</ion-footer>
