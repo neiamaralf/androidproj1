@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component , ViewChild, ElementRef } from '@angular/core';
 import {  NavParams,ModalController,ViewController,ModalOptions  } from 'ionic-angular';
 import { TarefaService } from '../../services/json.server';
 import { DBData } from '../principal/principal';
+import { Geolocation } from '@ionic-native/geolocation';
 
 export class ResultData{  
   public pvporproduto: Array<{
@@ -19,7 +20,10 @@ export class ResultData{
     estado: string,
     cep: string,
     fone: string,
-    tipo: string
+    tipo: string,
+    lat?:number,
+    long?:number,
+    distancia?:number
   }>;
   public currarray:any;
   constructor(public tipobusca:string){
@@ -77,11 +81,111 @@ export class CertUsrDlg {
   }
 }
 
+declare var google;
+
+@Component({
+  selector: 'page-map',
+  template: `
+  <ion-header>
+  <ion-navbar>
+    <ion-title>
+      Map
+    </ion-title>
+    <ion-buttons end>
+      <button ion-button (click)="addMarker()"><ion-icon name="add"></ion-icon>Adicionar marcador</button>
+    </ion-buttons>  
+  </ion-navbar>
+</ion-header>
+ 
+<ion-content>
+  <div #map id="map"></div>  
+</ion-content>
+  `
+})
+export class Mapa {
+   @ViewChild('map') mapElement: ElementRef;
+  map: any;
+  respage:any;
+  pos:any;
+  constructor(public viewCtrl: ViewController, public geolocation: Geolocation) {
+    this.respage=viewCtrl.data.respage;
+  }
+  ionViewDidLoad() {
+    this.geolocation.getCurrentPosition().then((position) => {
+      this.pos=position;
+
+      let latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+      let mapOptions = {
+        center: latLng,
+        zoom: 15,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      }
+
+      this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+     this.respage.resdata.currarray.forEach(element => {
+       this.respage.ts.getgeocode(this,element);
+       
+     });
+      this.addMarker(position.coords.latitude, position.coords.longitude) ;
+    });
+  }
+
+  addInfoWindow(marker, content) {
+
+    let infoWindow = new google.maps.InfoWindow({
+      content: content
+    });
+
+    google.maps.event.addListener(marker, 'click', () => {
+      infoWindow.open(this.map, marker);
+    });
+
+  }
+  
+
+  addMarker(latitude,longitude) {
+  var image = 'http://www.athena3d.com.br/bioatest/voce.png';
+   let marker = new google.maps.Marker({
+     icon: image,
+      map: this.map,
+      animation: google.maps.Animation.DROP,
+      position: {
+              lat: latitude,
+              lng: longitude
+            }
+    });
+    let content = "<h4>Information!</h4>";
+    this.addInfoWindow(marker, content);
+  }
+
+   addMarker1(latitude,longitude,label) {
+  
+   let marker = new google.maps.Marker({
+     label: label,
+      map: this.map,
+      animation: google.maps.Animation.DROP,
+      position: {
+              lat: latitude,
+              lng: longitude
+            }
+    });
+    let content = "<h4>Information!</h4>";
+    this.addInfoWindow(marker, content);
+  }
+
+  close() {
+    this.viewCtrl.dismiss();
+  }
+}
+
+
 @Component({
   selector: 'page-resultado',
   templateUrl: 'resultado.html'
 })
 export class PaginaResultado implements ModalOptions{
+ 
   limit: number = 10;
   offset: number = 0;
   item:any;
@@ -119,6 +223,8 @@ export class PaginaResultado implements ModalOptions{
   }
 
   vermapa(){
+     let popover = this.popoverCtrl.create(Mapa,{respage:this});
+    popover.present();
 
   }
 }

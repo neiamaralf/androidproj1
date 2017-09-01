@@ -97,6 +97,12 @@ export class HtmlWrapper {
         });
     }
 
+   dogetURL(callback,url) {
+        this.httpowner.http.get(url, this.options).map(res => res.json()).subscribe((data) => {
+            callback(this.httpowner, data);
+            console.log(data);
+        });
+    }
     
     dogetusrid(callback) {
         this.httpowner.storage.ready().then(() => {
@@ -703,6 +709,8 @@ export class TarefaService  {
         });
     }
 
+    
+
     getCertListUsrId(page: any, mn: any, idusr: any) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "getcertlistusr");
@@ -782,6 +790,52 @@ export class TarefaService  {
             }           
         });            
     }
+
+    getgeocode(respg,elem){
+        var url:String="https://maps.googleapis.com/maps/api/geocode/json?address=";
+         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+         var end = elem.endereco.split(" ");
+         end.forEach(e=>{
+             url=url+e+"+";
+         });
+         url.replace(/.$/,",");
+         url=url+"+"+elem.numero+"+-+";
+         var bair = elem.bairro.split(" ");
+         bair.forEach(e=>{
+             url=url+e+"+";
+         });
+         url.replace(/.$/,",");
+         url=url+"+";
+
+          var cid = elem.cidade.split(" ");
+         cid.forEach(e=>{
+             url=url+e+"+";
+         });
+         url.replace(/.$/,",");
+         url=url+"-+"+elem.estado+",+"+elem.cep;
+
+         //R.+Hermínio+Bagio,+105+-+Estrela,+Ponta+Grossa+-+PR,+84050-460;
+         url=url+"&key=AIzaSyBjF_58qpK1CsH2SMZdhNtFmab87Q4wfWU";
+        htmlwrapper.dogetURL(function (ts, data) {
+            if (data.status == "OK") {
+                elem.lat=data.results[0].geometry.location.lat;console.log("lat="+ elem.lat);
+                elem.long=data.results[0].geometry.location.lng;console.log("long="+ elem.long);
+                respg.addMarker1(elem.lat,elem.long,"1");
+                data.results.forEach(row => {
+                 
+                });
+                var urld:String="https://maps.googleapis.com/maps/api/distancematrix/json?units=meters&origins=";
+                urld=urld+respg.pos.coords.latitude+","+respg.pos.coords.longitude+"&destinations="+elem.lat+"%2C"+elem.long;
+                urld=urld+"&key=AIzaSyBjF_58qpK1CsH2SMZdhNtFmab87Q4wfWU";
+                htmlwrapper.dogetURL(function (ts, data) {
+                    if (data.status == "OK") {
+                       console.log("disatancia="+data.rows[0].elements[0].distance.value);
+                    }
+                }, urld);
+             }
+         }, url);
+         // 40.6655101,-73.89188969999998&destinations=40.598566%2C-73.7527626&key=AIzaSyBjF_58qpK1CsH2SMZdhNtFmab87Q4wfWU
+     }
 
     getPvByProduto(page: any) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
