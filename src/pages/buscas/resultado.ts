@@ -3,6 +3,8 @@ import {  NavParams,ModalController,ViewController,ModalOptions  } from 'ionic-a
 import { TarefaService } from '../../services/json.server';
 import { DBData } from '../principal/principal';
 import { Geolocation } from '@ionic-native/geolocation';
+import { Pipe, PipeTransform } from "@angular/core";
+import { Slides } from 'ionic-angular';
 
 export class ResultData{  
   public pvporproduto: Array<{
@@ -83,16 +85,19 @@ export class CertUsrDlg {
 
 declare var google;
 
+
+
+
 @Component({
   selector: 'page-map',
   template: `
   <ion-header>
   <ion-navbar>
     <ion-title>
-      Map
+      MAPA
     </ion-title>
     <ion-buttons end>
-      <button ion-button (click)="addMarker()"><ion-icon name="add"></ion-icon>Adicionar marcador</button>
+      <button ion-button>{{respage.item.dbdata.nome}}</button>
     </ion-buttons>  
   </ion-navbar>
 </ion-header>
@@ -111,7 +116,10 @@ export class Mapa {
     this.respage=viewCtrl.data.respage;
   }
   ionViewDidLoad() {
-    this.geolocation.getCurrentPosition().then((position) => {
+    var options = {
+        enableHighAccuracy : true
+    };
+    this.geolocation.getCurrentPosition(options).then((position) => {
       this.pos=position;
 
       let latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -124,7 +132,7 @@ export class Mapa {
 
       this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
      this.respage.resdata.currarray.forEach(element => {
-       this.respage.ts.getgeocode(this,element);
+       this.respage.ts.getgeocode(this,element,true,false);
        
      });
       this.addMarker(position.coords.latitude, position.coords.longitude) ;
@@ -155,14 +163,14 @@ export class Mapa {
               lng: longitude
             }
     });
-    let content = "<h4>Information!</h4>";
-    this.addInfoWindow(marker, content);
+    //let content = "<h4>Information!</h4>";
+    //this.addInfoWindow(marker, content);
   }
 
-   addMarker1(latitude,longitude,label) {
+   addMarker1(latitude,longitude,elem) {
   
    let marker = new google.maps.Marker({
-     label: label,
+     label: elem.nome,
       map: this.map,
       animation: google.maps.Animation.DROP,
       position: {
@@ -170,7 +178,8 @@ export class Mapa {
               lng: longitude
             }
     });
-    let content = "<h4>Information!</h4>";
+    let content = "<h2>"+elem.nome+"</h2>"+"<h5><b>Endereço:</b>"+this.respage.ts.constroiendereco(elem)+"</h5>";
+    
     this.addInfoWindow(marker, content);
   }
 
@@ -180,20 +189,118 @@ export class Mapa {
 }
 
 
+@Pipe( {
+name: 'orderBy'
+} )
+export class OrderByPipe implements PipeTransform {
+transform( array: Array<any>, orderType: boolean ): Array<any> {
+    array.sort(  );
+    return array;
+  }
+}
+
 @Component({
+  selector: 'page-prodpv',
+  template: `
+  <ion-header>
+    <new-navbar hideBackButton></new-navbar>
+ </ion-header>
+ 
+<ion-content>
+ <ion-list no-lines>
+        <ion-list-header color="cor2">{{res.nome}}
+           
+        </ion-list-header>
+        <ion-item>
+  <ion-slides >
+    <ion-slide *ngFor="let item of resdata.currarray" >      
+      <img src="http://athena3d.com.br/bioatest/imagens/{{item.pimg}}" class="slide-image" (click)="slideTap(item.pimg)"/>
+    </ion-slide>
+  </ion-slides>
+  </ion-item>
+  <ion-item  *ngIf="showimg" color="cor1">
+    <img src="http://athena3d.com.br/bioatest/imagens/full/{{itempimg}}" />   
+  </ion-item>
+  
+  <ion-item><b>Sobre:</b><button style="text-align: right" item-right icon-right (click)="likeit()">1.109<ion-icon color="cor2" name="heart"></ion-icon></button>
+  </ion-item>
+  </ion-list>
+</ion-content>
+<ion-footer>
+    <page-rodape></page-rodape>
+</ion-footer>
+  `
+})
+export class Produtor_PV {
+  @ViewChild(Slides) slides: Slides;
+  respage:any;
+  res:any;
+  resdata: ResultData ;
+  showimg:Boolean=false;
+  imgindex:number=-1;
+  itempimg:any;
+  
+  slideTap(itempimg){
+    if(this.itempimg===itempimg)this.showimg=!this.showimg;
+    else this.showimg=true;
+    this.imgindex = this.slides.getActiveIndex();
+    this.itempimg=itempimg;
+    console.log('Current index is', this.imgindex);
+  }
+
+  constructor(public NP: NavParams) {
+    this.respage = NP.get('respage');
+    this.res = NP.get('res');
+    this.resdata = new ResultData("porproduto");
+    this.respage.ts.getImgsListUsrID(this.respage, this.resdata,this.res);
+  }
+
+  ngAfterViewInit() {
+    this.slides.slidesPerView = 4;
+    this.slides.centeredSlides=false;
+    this.slides.pager=false;
+    this.slides.zoom=true;
+    this.slides.spaceBetween=5;
+  }
+}
+
+@Component({  
   selector: 'page-resultado',
   templateUrl: 'resultado.html'
 })
 export class PaginaResultado implements ModalOptions{
  
+  pos:any;
   limit: number = 10;
   offset: number = 0;
   item:any;
   resdata: ResultData ;
-  constructor( public ts: TarefaService,public NP: NavParams,public popoverCtrl: ModalController) {
+  constructor( public ts: TarefaService,public NP: NavParams,public popoverCtrl: ModalController, private geolocation: Geolocation) {
    this.item = NP.get('item');
-   this.resdata= new ResultData(NP.get('tipobusca'));
-   ts.getPvByProduto(this);
+   this.resdata = new ResultData(NP.get('tipobusca'));
+   console.log(this.resdata);
+   this.geolocation.getCurrentPosition().then((position) => {
+     console.log(position);
+     this.pos = position;
+     ts.getPvByProdutoasync(this);
+   }).catch((error) => {
+     console.log('Error getting location', error);
+   });
+
+   /*const subscription = this.geolocation.watchPosition()
+     .filter((p) => p.coords !== undefined) //Filter Out Errors
+     .subscribe(position => {
+       console.log(position.coords.longitude + ' ' + position.coords.latitude);
+       subscription.unsubscribe();
+     });
+
+   let watch = this.geolocation.watchPosition();
+   watch.subscribe((data) => {
+     console.log(data);
+   });*/
+
+   
+   
   }  
 
   showcertificacoes(myEvent,_res){
@@ -218,7 +325,9 @@ export class PaginaResultado implements ModalOptions{
 
   }
 
-  alerta(){
+  alerta(res){
+     let popover = this.popoverCtrl.create(Produtor_PV,{respage:this,res:res});
+    popover.present();
 
   }
 

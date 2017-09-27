@@ -316,7 +316,7 @@ export class Principal  implements OnDestroy{
     this.ts.storage.ready().then(() => {
       this.ts.storage.get('userid').then((idusuario) => {
         var url = "http://www.athena3d.com.br/bioatest/uploadimage.php";
-        var newfilename = this.createFileName();
+        var newfilename = this.createFileName(true);
         var targetPath = this.lastImage;
         var tabela=menuitem.tabela;
         var options = {
@@ -327,6 +327,7 @@ export class Principal  implements OnDestroy{
           params: { 'tabela': tabela, 'fileName': newfilename, 'idprod': menuitem.dbdata.id,'idusuario':idusuario,'texto':linha.info }
         };
         console.log(options);
+        console.log("targetPath="+targetPath);
         const fileTransfer: TransferObject = this.transfer.create();
         this.loading = this.loadingCtrl.create({
           content: 'Enviando foto...',
@@ -360,6 +361,22 @@ export class Principal  implements OnDestroy{
     this.ts.deleteIMG(this,menuitem, linha);
   }
 
+  base64MimeType(encoded) {
+    var result = null;
+
+    if (typeof encoded !== 'string') {
+      return result;
+    }
+
+    var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
+
+    if (mime && mime.length) {
+      result = mime[1];
+    }
+
+    return result;
+  }
+
   public takePicture(menuitem, sourceType, linha) {
     var options = {
       allowEdit: true,
@@ -367,22 +384,25 @@ export class Principal  implements OnDestroy{
       sourceType: sourceType,
       saveToPhotoAlbum: false,
       correctOrientation: true,
-      destinationType: this.camera.DestinationType.DATA_URL,
+      destinationType: this.camera.DestinationType.FILE_URI,
       
         encodingType: this.camera.EncodingType.JPEG,
-      targetWidth: 150,
-      targetHeight: 150
+      targetWidth: 700,
+      targetHeight: 525
     };
     console.log(menuitem);
     this.camera.getPicture(options).then((imagePath) => {
       
-      let newFileName = this.createFileName();
+      
       if (!this.platform.is("mobile") || this.platform.is("mobileweb")) {
+        let newFileName = this.createFileName(false);
         let base64Image =imagePath.replace(" ", "+");
+        console.log(this.base64MimeType(base64Image));
         menuitem.dbdata.imagem = newFileName;
         this.ts.addImagetoDB(menuitem.dbdata.id,this, menuitem.tabela, base64Image, newFileName);
       }
       else {
+        let newFileName = this.createFileName(true);
         if (this.platform.is("Win32NT") || this.platform.is("windows")) {
           cordova.file = {
             dataDirectory: 'ms-appdata:///local/'
@@ -414,8 +434,9 @@ export class Principal  implements OnDestroy{
     });
   }
 
-  private createFileName() {
-    var d = new Date(), n = d.getTime(), newFileName = n + ".jpg";
+  private createFileName(addext:Boolean) {
+    var d = new Date(), n = d.getTime(), newFileName = n +".";
+    if(addext)newFileName=newFileName+ "jpg";
     return newFileName;
   }
 

@@ -11,7 +11,7 @@ import { newNavbar} from '../pages/cabecalho/cabecalho';
 import { Rodape } from '../pages/rodape/rodape'
 import { DadosUsuario,TarefaService} from '../services/json.server';
 import { CadastroPage } from '../pages/cadastrologin/cadastrologin';
-import { PaginaResultado,CertUsrDlg,Mapa} from '../pages/buscas/resultado';
+import { PaginaResultado,CertUsrDlg,Mapa,Produtor_PV} from '../pages/buscas/resultado';
 import {TextToSpeech} from '@ionic-native/text-to-speech';
 import { SpeechRecognition } from '@ionic-native/speech-recognition';
 import { File } from '@ionic-native/file';
@@ -34,7 +34,8 @@ import { Geolocation } from '@ionic-native/geolocation';
     BuscaCEPPage,
     ListaPage,
     PaginaResultado,
-    CertUsrDlg,Mapa
+    CertUsrDlg,Mapa,
+    Produtor_PV
   ],
   imports: [
     IonicModule.forRoot(BioatestApp),ElasticModule
@@ -53,7 +54,8 @@ import { Geolocation } from '@ionic-native/geolocation';
     ListaPage ,
     PaginaResultado,
     CertUsrDlg,
-    Mapa
+    Mapa,
+    Produtor_PV
   ],
   providers: [
     SpeechRecognition,

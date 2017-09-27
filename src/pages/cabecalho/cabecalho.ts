@@ -14,7 +14,7 @@ export class newNavbar {
 
   constructor(public navCtrl: NavController, public tarefaService: TarefaService) {
     if (!tarefaService.logged)
-      tarefaService.assertlogin(navCtrl, Principal);
+      tarefaService.assertlogin(navCtrl, Principal,this);
   }
 
   soundOnOff(event) {
@@ -36,7 +36,7 @@ export class newNavbar {
   }
 
   logout() {
-    this.tarefaService.logout();
+    this.tarefaService.logout(this.navCtrl, Principal,this);
     // if(this.navCtrl.parent!=null this.navCtrl.getByIndex)
     //this.navCtrl.popToRoot();
     if (this.navCtrl.first() != this.navCtrl.getActive())
@@ -45,18 +45,18 @@ export class newNavbar {
   }
 
   login() {
-    this.tarefaService.loginprompt(this.navCtrl, Principal);
+    this.tarefaService.loginprompt(this.navCtrl, Principal,this);
   }
 
   cadastrar(event) {
     this.navCtrl.push(CadastroPage, {
-      edit: false, getcep: true, tabela: "usuarios",item:{title:"cadastro"}, formvariables: this.tarefaService.dadosUsuario
+      edit: false, getcep: true, tabela: "usuarios",item:{title:"cadastro"}, formvariables: this.tarefaService.dadosUsuario,cab:this
     });
   }
 
   editar(event) {
     this.navCtrl.push(CadastroPage, {
-      edit: true, getcep: false, tabela: "usuarios"
+      edit: true, getcep: false, tabela: "usuarios",cab:this
     });
     //  if(this.navCtrl.getActive())
     // console.log(this.navCtrl.getActive().pageRef().nativeElement.localName);

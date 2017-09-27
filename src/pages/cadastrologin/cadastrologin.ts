@@ -16,6 +16,7 @@ export class CadastroPage {
   public formvariables:any;
   public item:any;
   public principal:any;
+  public cab:any;
   public pageTitle:any="";
   public dbdata:DBData=new DBData();
 
@@ -23,6 +24,7 @@ export class CadastroPage {
     this.tarefaService.tabela = NP.get('tabela');
     this.pageTitle=NP.get('pageTitle');
     this.principal=NP.get('principal');
+    this.cab=NP.get('cab');
     let validatorok:boolean=this.tarefaService.tabela=="usuario";
     this.form = fb.group({
       "name": ["", Validators.required],
@@ -127,5 +129,7 @@ export class CadastroPage {
     this.tarefaService.getUDfromstorage();
     this.tarefaService.hideForm=false;
     this.navCtrl.pop();
+    if (!this.tarefaService.logged)
+     this.tarefaService.loginprompt(this.navCtrl, Principal,this.cab);
   }
 }

@@ -202,16 +202,7 @@ export class TarefaService  {
         }
     }
 
-    assertlogin(nav: any, page: any) {
-        this.storage.ready().then(() => {
-            this.storage.get('userid').then((userid) => {
-                this.storage.get('token').then((token) => {
-                    this.verificatoken(token, userid, nav, page);
-                })
-            })
-        });
-    }
-
+    
     createEntry(principal, item, nav: any, page: any, formvariables) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "create");
@@ -409,7 +400,23 @@ export class TarefaService  {
         });
     }
 
-    verificatoken(token, userid, nav: any, page: any) {
+    assertlogin(nav: any, page: any,cab:any) {
+        this.storage.ready().then(() => {
+            this.storage.get('userid').then((userid) => {
+                this.storage.get('token').then((token) => {
+                    this.verificatoken(token, userid, nav, page,cab);
+                }).catch(function (e) {
+                    //this.loginprompt(nav, page);
+                });
+            }).catch(function (e) {
+               // this.loginprompt(nav, page);
+                });
+        }).catch(function (e) {
+           // this.loginprompt(nav, page);
+        });;
+    }
+
+    verificatoken(token, userid, nav: any, page: any,cab:any) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "asserttoken");
         htmlwrapper.bodyparams.add("token", token);
@@ -424,19 +431,27 @@ export class TarefaService  {
                 ts.getUDfromstorage();
                 nav.push(page);                
             }
+            else ts.loginprompt(nav, page,cab);
         });      
     }
 
-    loginprompt(nav: any, page: any) {
+    loginprompt(nav: any, page: any,cab:any) {
         let prompt = this.alertCtrl.create({
+            enableBackdropDismiss:false,
             inputs: [{ type: 'email', name: 'email', placeholder: 'digite seu email' },
             { type: 'password', name: 'senha', placeholder: 'digite sua senha' }],
             buttons: [
-                { text: 'Cancelar' },
+                {
+                    text: 'Cadastrar',
+                    handler: data => { 
+                        cab.cadastrar(null);
+                      //  this.dologin(data.email, data.senha, true, nav, page);
+                    }
+                },
                 {
                     text: 'Entrar',
                     handler: data => {
-                        this.dologin(data.email, data.senha, true, nav, page);
+                        this.dologin(data.email, data.senha, true, nav, page,cab);
                     }
                 }
             ]
@@ -444,7 +459,7 @@ export class TarefaService  {
         prompt.present();
     }
 
-    dologin(email, password, showprompt: boolean, nav: any, page: any) {
+    dologin(email, password, showprompt: boolean, nav: any, page: any,cab:any) {
         var device: string = "test";
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "login");
@@ -463,9 +478,30 @@ export class TarefaService  {
             }
             else {
                 alert('erro :' + data[0].nome);
-                if (showprompt) ts.loginprompt(nav, page);
+                if (showprompt) ts.loginprompt(nav, page,cab);
             }
         });       
+    }
+
+     logout(nav: any, page: any,cab:any) {
+        this.storage.ready().then(() => {
+            this.storage.get('userid').then((userid) => {
+                this.storage.get('token').then((token) => {
+                    var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+                    htmlwrapper.bodyparams.add("key", "logout");
+                    htmlwrapper.bodyparams.add("token", token);
+                    htmlwrapper.bodyparams.add("userid", userid);
+                    htmlwrapper.dopost(function (ts, data) {
+                        if (data[0].logout == "ok") {
+                            ts.logged = false;
+                            ts.mostraCep = true;
+                            ts.cleanstorage();
+                            ts.loginprompt(nav, page,cab);
+                        }
+                    });
+                });
+            });
+        });
     }
 
     insertParceiroLista(principal, item, menuitems) {
@@ -586,25 +622,7 @@ export class TarefaService  {
         });
     }
 
-    logout() {
-        this.storage.ready().then(() => {
-            this.storage.get('userid').then((userid) => {
-                this.storage.get('token').then((token) => {
-                    var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
-                    htmlwrapper.bodyparams.add("key", "logout");
-                    htmlwrapper.bodyparams.add("token", token);
-                    htmlwrapper.bodyparams.add("userid", userid);
-                    htmlwrapper.dopost(function (ts, data) {
-                        if (data[0].logout == "ok") {
-                            ts.logged = false;
-                            ts.mostraCep = true;
-                            ts.cleanstorage();
-                        }
-                    });
-                });
-            });
-        });
-    }
+   
 
     getInfoUsuario(historico, valores, missao) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
@@ -791,7 +809,7 @@ export class TarefaService  {
         });            
     }
 
-    getgeocode(respg,elem){
+    getgeocode(respg,elem,addmarker:Boolean,sortarray:Boolean){
         var url:String="https://maps.googleapis.com/maps/api/geocode/json?address=";
          var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
          var end = elem.endereco.split(" ");
@@ -820,16 +838,29 @@ export class TarefaService  {
             if (data.status == "OK") {
                 elem.lat=data.results[0].geometry.location.lat;console.log("lat="+ elem.lat);
                 elem.long=data.results[0].geometry.location.lng;console.log("long="+ elem.long);
-                respg.addMarker1(elem.lat,elem.long,"1");
-                data.results.forEach(row => {
-                 
-                });
+                if(addmarker)
+                 respg.addMarker1(elem.lat,elem.long,elem);
+               // data.results.forEach(row => { });
                 var urld:String="https://maps.googleapis.com/maps/api/distancematrix/json?units=meters&origins=";
                 urld=urld+respg.pos.coords.latitude+","+respg.pos.coords.longitude+"&destinations="+elem.lat+"%2C"+elem.long;
                 urld=urld+"&key=AIzaSyBjF_58qpK1CsH2SMZdhNtFmab87Q4wfWU";
                 htmlwrapper.dogetURL(function (ts, data) {
                     if (data.status == "OK") {
-                       console.log("disatancia="+data.rows[0].elements[0].distance.value);
+                        elem.distancia=data.rows[0].elements[0].distance.value;
+                       console.log("distancia="+elem.distancia);
+                       if (sortarray) {
+                           respg.resdata.currarray.sort(function (a: any, b: any) {
+                               console.log("a=" + a);
+                               let ae = a.distancia;
+                               let be = b.distancia;
+                               if (ae == undefined && be == undefined) return 0;
+                               if (ae == undefined && be != undefined) return 1;
+                               if (ae != undefined && be == undefined) return -1;
+                               if (ae == be) return 0;
+                               return ae < be ? -1 : 1;
+                           });//.then(alert("ok"))
+
+                       }
                     }
                 }, urld);
              }
@@ -837,7 +868,13 @@ export class TarefaService  {
          // 40.6655101,-73.89188969999998&destinations=40.598566%2C-73.7527626&key=AIzaSyBjF_58qpK1CsH2SMZdhNtFmab87Q4wfWU
      }
 
-    getPvByProduto(page: any) {
+     getPvByProdutoasync(page: any) {
+         this.getPvByProduto(page);
+    }
+
+
+
+     getPvByProduto(page: any) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", page.resdata.tipobusca);
         htmlwrapper.bodyparams.add("idprod", page.item.dbdata.id);
@@ -846,6 +883,7 @@ export class TarefaService  {
        
         htmlwrapper.doget(function (ts, data) {
             if (data[0].nome != "null") {
+                console.log("data.length=",data.length);
                 data.forEach(row => {
                     page.resdata.currarray.push({
                         pimg: row.pimg,
@@ -865,11 +903,34 @@ export class TarefaService  {
                         tipo: row.tipo
 
                     });
-                });                
+                    ts.getgeocode(page,page.resdata.currarray[page.resdata.currarray.length-1],false,data.length==page.resdata.currarray.length);
+
+                });     
+
                 page.offset += page.limit;
             }           
         });            
     }
+
+    getImgsListUsrID(pageres: any, resdata: any,res:any) {
+        var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+        htmlwrapper.bodyparams.add("key", "getimgslist");
+        htmlwrapper.bodyparams.add("idusuario", res.id);
+        htmlwrapper.bodyparams.add("offset", "0");
+        htmlwrapper.bodyparams.add("limit", "50");
+        htmlwrapper.doget(function (ts, data) {
+            if (data[0].id != "null") {
+                data.forEach(row => {
+                    resdata.currarray.push({
+                        pimg: row.imagem,
+                        lpimg:row.texto
+                       
+                    });
+                });
+            }
+        });
+    }
+
 
     getParceirosList(page: any, mn: any, categoria: any, _showdados: boolean) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
