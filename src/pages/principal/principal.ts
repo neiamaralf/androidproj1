@@ -324,7 +324,7 @@ export class Principal  implements OnDestroy{
           fileName: newfilename,
           chunkedMode: false,
           mimeType: "multipart/form-data",
-          params: { 'tabela': tabela, 'fileName': newfilename, 'idprod': menuitem.dbdata.id,'idusuario':idusuario,'texto':linha.info }
+          params: { 'tabela': tabela, 'fileName': newfilename, 'id': menuitem.dbdata.id,'idusuario':idusuario,'texto':linha.info }
         };
         console.log(options);
         console.log("targetPath="+targetPath);
@@ -385,15 +385,12 @@ export class Principal  implements OnDestroy{
       saveToPhotoAlbum: false,
       correctOrientation: true,
       destinationType: this.camera.DestinationType.FILE_URI,
-      
-        encodingType: this.camera.EncodingType.JPEG,
+      encodingType: this.camera.EncodingType.JPEG,
       targetWidth: 700,
       targetHeight: 525
     };
     console.log(menuitem);
     this.camera.getPicture(options).then((imagePath) => {
-      
-      
       if (!this.platform.is("mobile") || this.platform.is("mobileweb")) {
         let newFileName = this.createFileName(false);
         let base64Image =imagePath.replace(" ", "+");
@@ -420,7 +417,6 @@ export class Principal  implements OnDestroy{
               this.uploadImage(menuitem, linha);
             });
         } else {
-          //console.log("cordova.file.dataDirectory:" + cordova.file.dataDirectory);
           var currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
           var correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
           this.lastImage = correctPath + currentName;
@@ -449,7 +445,7 @@ export class Principal  implements OnDestroy{
     if (img === null) {
       return '';
     } else {
-      return "http://athena3d.com.br/bioatest/imagens/" + img;
+      return "http://athena3d.com.br/bioatest/" + img;
     }
   }
 

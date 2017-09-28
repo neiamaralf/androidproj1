@@ -57,7 +57,7 @@ export class ResultData{
      <ion-row>
      <ion-col>
      <ion-thumbnail>
-      <img  item-start src="http://athena3d.com.br/bioatest/imagens/{{cert.dbdata.imagem}}">
+      <img  item-start src="http://athena3d.com.br/bioatest/{{cert.dbdata.imagem}}">
     </ion-thumbnail>
     </ion-col>
     <ion-col text-align="left">
@@ -214,12 +214,12 @@ transform( array: Array<any>, orderType: boolean ): Array<any> {
         <ion-item>
   <ion-slides >
     <ion-slide *ngFor="let item of resdata.currarray" >      
-      <img src="http://athena3d.com.br/bioatest/imagens/{{item.pimg}}" class="slide-image" (click)="slideTap(item.pimg)"/>
+      <img src="http://athena3d.com.br/bioatest/{{item.pimg}}" class="slide-image" (click)="slideTap(item.pimg)"/>
     </ion-slide>
   </ion-slides>
   </ion-item>
-  <ion-item  *ngIf="showimg" color="cor1">
-    <img src="http://athena3d.com.br/bioatest/imagens/full/{{itempimg}}" />   
+  <ion-item  *ngIf="showimg" color="cor1" >
+    <img src="http://athena3d.com.br/bioatest/{{itempimg}}" />   
   </ion-item>
   
   <ion-item><b>Sobre:</b><button style="text-align: right" item-right icon-right (click)="likeit()">1.109<ion-icon color="cor2" name="heart"></ion-icon></button>
