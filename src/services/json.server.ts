@@ -155,11 +155,9 @@ export class TarefaService  {
     public tabela: string = "usuarios";
    
 
-    constructor(/*private fb: Facebook,*/public plt: Platform, public toastCtrl: ToastController, public speechRecognition: SpeechRecognition,
+    constructor(public plt: Platform, public toastCtrl: ToastController, public speechRecognition: SpeechRecognition,
         public tts: TextToSpeech, public http: Http, public alertCtrl: AlertController) {
-        //this.cleanstorage();         
         this.getUDfromstorage();
-
         if (plt.is('android') || plt.is('ios')) {
             speechRecognition.isRecognitionAvailable().then((available: boolean) => this.sendNotification(available))
             /*speechRecognition.startListening()
@@ -188,7 +186,7 @@ export class TarefaService  {
 
    /* async*/ getfala() {
         this.speechRecognition.startListening({
-            language: 'pt-BR', matches: 1, prompt: ""/*Android only*/, showPopup: true/*Android only*/, showPartial: false/*iOS only */
+            language: 'pt-BR', matches: 1, prompt: ""/*Android only*/, showPopup: false/*Android only*/, showPartial: false/*iOS only */
         }).
             subscribe((matches: Array<string>) => this.speechtext = matches[0], (onerror) => this.sendNotification('erro:' + onerror))
     }
@@ -255,26 +253,6 @@ export class TarefaService  {
                 }
             }
         });       
-    }
-
-     updateInfoUsuario(itemlinha, texto) {
-        this.storage.ready().then(() => {
-            this.storage.get('userid').then((userid) => {
-                var campo: string;
-                if (itemlinha.title == 'HISTÓRICO') campo = "historico";
-                else if (itemlinha.title == 'VALORES') campo = "valores";
-                else if (itemlinha.title == 'MISSÃO') campo = "missao";
-                var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
-                htmlwrapper.bodyparams.add("key", "updateinfousuario");
-                htmlwrapper.bodyparams.add("campo", campo);
-                htmlwrapper.bodyparams.add("userid", userid);
-                htmlwrapper.bodyparams.add("texto", texto);
-                htmlwrapper.dopost(function (ts, data) {
-                    if (data.update == "ok") ts.sendNotification(campo + " atualizado com sucesso.");
-                    else ts.sendNotification("Algo deu errado, verifique a conexão com a internet.");
-                });               
-            });
-        });
     }
 
     constroiendereco(formvariables) {
@@ -622,7 +600,26 @@ export class TarefaService  {
         });
     }
 
-   
+    updateInfoUsuario(itemlinha, texto) {
+        this.storage.ready().then(() => {
+            this.storage.get('userid').then((userid) => {
+                var campo: string;
+                if (itemlinha.title == 'HISTÓRICO') campo = "historico";
+                else if (itemlinha.title == 'VALORES') campo = "valores";
+                else if (itemlinha.title == 'MISSÃO') campo = "missao";
+                var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+                htmlwrapper.bodyparams.add("key", "updateinfousuario");
+                htmlwrapper.bodyparams.add("campo", campo);
+                htmlwrapper.bodyparams.add("userid", userid);
+                htmlwrapper.bodyparams.add("texto", texto);
+                htmlwrapper.dopost(function (ts, data) {
+                    if (data.update == "ok") ts.sendNotification(campo + " atualizado com sucesso.");
+                    else ts.sendNotification("Algo deu errado, verifique a conexão com a internet.");
+                });
+            });
+        });
+    }
+
 
     getInfoUsuario(historico, valores, missao) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
@@ -635,6 +632,8 @@ export class TarefaService  {
             }
         });        
     }
+
+    
 
     getProdListUsr(page: any, mn: any, categoria: any) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
@@ -787,7 +786,7 @@ export class TarefaService  {
         var mn:any= page.dbdata.items[0];
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "searchbyprod");
-        htmlwrapper.bodyparams.add("nome", page._searchbar.value);
+        htmlwrapper.bodyparams.add("nome", page.sbvalue);
         htmlwrapper.bodyparams.add("offset", page.offset);
         htmlwrapper.bodyparams.add("limit", page.limit);
         htmlwrapper.doget(function (ts, data) {
@@ -887,8 +886,8 @@ export class TarefaService  {
                 data.forEach(row => {
                     page.resdata.currarray.push({
                         pimg: row.pimg,
-                        preco: row.preco,
                         lpimg: row.lpimg,
+                        preco: row.preco,                        
                         nomeprod: row.nomeprod,
                         id: row.id,
                         nome: row.nome,
@@ -914,7 +913,7 @@ export class TarefaService  {
 
     getImgsListUsrID(pageres: any, resdata: any,res:any) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
-        htmlwrapper.bodyparams.add("key", "getimgslist");
+        htmlwrapper.bodyparams.add("key", "getimgslistusrid");
         htmlwrapper.bodyparams.add("idusuario", res.id);
         htmlwrapper.bodyparams.add("offset", "0");
         htmlwrapper.bodyparams.add("limit", "50");
@@ -922,13 +921,27 @@ export class TarefaService  {
             if (data[0].id != "null") {
                 data.forEach(row => {
                     resdata.currarray.push({
-                        pimg: row.imagem,
-                        lpimg:row.texto
+                        pimg: row.imagem,                        
+                        fullpimg:row.imagemfull,                  
+                        texto:row.texto
                        
                     });
                 });
             }
         });
+    }
+
+    getInfoPROD_PV(infodata,res) {
+        var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+        htmlwrapper.bodyparams.add("key", "infousuario");
+        htmlwrapper.bodyparams.add("idusuario", res.id);
+        htmlwrapper.doget(function (ts, data) {
+            if (data[0].id != "null") {
+                infodata.historico = data[0].historico;
+                infodata.valores = data[0].valores;
+                infodata.missao = data[0].missao;
+            }
+        });        
     }
 
 

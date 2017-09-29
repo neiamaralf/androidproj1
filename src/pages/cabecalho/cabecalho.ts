@@ -10,7 +10,6 @@ import { Principal } from '../../pages/principal/principal';
   templateUrl: 'cabecalho.html'
 })
 export class newNavbar {
-  @ViewChild('sb') _searchbar: Searchbar;
 
   constructor(public navCtrl: NavController, public tarefaService: TarefaService) {
     if (!tarefaService.logged)
@@ -27,14 +26,7 @@ export class newNavbar {
     this.tarefaService.getfala();
   }
 
-  search() {
-    this.tarefaService.searchbar = !this.tarefaService.searchbar;
-    if (this.tarefaService.searchbar)
-      setTimeout(() => {
-        this._searchbar.setFocus();
-      }, 150);
-  }
-
+  
   logout() {
     this.tarefaService.logout(this.navCtrl, Principal,this);
     // if(this.navCtrl.parent!=null this.navCtrl.getByIndex)

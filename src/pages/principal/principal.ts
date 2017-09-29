@@ -64,36 +64,36 @@ export class DBData {
 
 @Component({
   template: `
-  <ion-header>
+  <ion-header >
    <ion-toolbar color="cor1">
-        <ion-title>
-            Buscar
-        </ion-title>
-        <ion-buttons start>
+   <span ><h3 style="color:white;text-align:center">Buscar</h3></span>
+   <ion-buttons end>
+        
             <button ion-button (click)="close(null)">
                   <span ion-text color="primary" showWhen="ios">Cancelar</span>
                   <ion-icon name="md-close" ></ion-icon>
                 </button>
         </ion-buttons>
     </ion-toolbar>
-     <ion-grid no-padding>
-        <ion-row  align-items-center justify-content-center>
-            <ion-col col-8>
-             <ion-searchbar #sb placeholder="Buscar"  [(ngModel)]="sbvalue" (ionInput)="getItems($event)"></ion-searchbar>
-            </ion-col>
-             <ion-col col-4>
-            <button ion-button icon-only clear (click)="getmic($event)"><ion-icon name="microphone" color="danger" ></ion-icon></button>
-            </ion-col>
-        </ion-row>
-    </ion-grid>
    
+   <ion-toolbar color="cor1">
    
+       <ion-buttons left>
+        <button ion-button left icon-only clear (click)="getmictext()"><ion-icon name="microphone" [color]="gravando ? 'danger' : 'primary'" ></ion-icon></button>
+         </ion-buttons>
+         <ion-searchbar   #sb placeholder="Buscar"  [(ngModel)]="sbvalue" (ionInput)="getItems()"></ion-searchbar>
+        <ion-buttons end>
+        
+          
+        </ion-buttons>
+    </ion-toolbar>
    
+               
+           
   </ion-header>
-  <ion-content ion-scroll>
- 
-    <ion-list>
-    
+  <ion-content ion-scroll> 
+    <ion-list>    
+   
       <button ion-item *ngFor="let item of dbdata.items[0].menuitems" (click)="close(item)">{{item.title}}</button>     
     </ion-list>
      <ion-infinite-scroll  (ionInfinite)="$event.waitFor(populate())">
@@ -104,6 +104,7 @@ export class DBData {
 })
 export class PopoverPage {
   @ViewChild('sb') _searchbar: Searchbar;
+  gravando:Boolean=false;
   dbdata: DBData = new DBData();
   public sbvalue:string;
   limit: number = 10;
@@ -127,6 +128,14 @@ export class PopoverPage {
       });   
   }
 
+  getmictext(){
+    this.gravando=true;
+    this.viewCtrl.data.principal.ts.speechRecognition.startListening({
+      language: 'pt-BR', matches: 1, prompt: ""/*Android only*/, showPopup: false/*Android only*/, showPartial: false/*iOS only */
+    }).
+      subscribe((matches: Array<string>) => {this.sbvalue = matches[0];this.gravando=false;this.getItems()}, (onerror) => {this.gravando=false});
+  }
+
   close(item) {
     this.viewCtrl.dismiss().then(() => {
       if (item != null) {
@@ -136,7 +145,7 @@ export class PopoverPage {
 
   }
 
-  getItems(event){
+  getItems(){
     this.offset=0;
     this.dbdata.items[0].menuitems=[];
    this.populate();
@@ -163,18 +172,16 @@ export class Principal  implements OnDestroy{
   cansearchProd: boolean = false;
   private subscription: Subscription;
 
-  presentPopover(myEvent) {
+  presentPopover() {
     let popover = this.modalCtrl.create(PopoverPage, {principal:this,tipobusca:this.tipobuscaproduto});
-    popover.present({
-      ev: myEvent
-    });
+    popover.present();
     popover.onDidDismiss((popoverData) => {
      
     })
   }
 
   getItems(event) {
-    this.presentPopover(event);
+    this.presentPopover();
   }
 
   constructor(public platform: Platform, public navCtrl: NavController, public ts: TarefaService, public navParams: NavParams,

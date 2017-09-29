@@ -9,8 +9,11 @@ import { Slides } from 'ionic-angular';
 export class ResultData{  
   public pvporproduto: Array<{
     pimg: string,
-    preco: string,
+    fullpimg?: string,
     lpimg: string,
+    fulllpimg?: string,
+    texto?:string,
+    preco: string,    
     nomeprod: string,
     id: string,
     nome:string,
@@ -26,6 +29,7 @@ export class ResultData{
     lat?:number,
     long?:number,
     distancia?:number
+   
   }>;
   public currarray:any;
   constructor(public tipobusca:string){
@@ -209,12 +213,12 @@ transform( array: Array<any>, orderType: boolean ): Array<any> {
 <ion-content>
  <ion-list no-lines>
         <ion-list-header color="cor2">{{res.nome}}
-           
+           <button style="text-align: right" item-right icon-right (click)="likeit()">1.109<ion-icon color="cor2" name="heart"></ion-icon></button>
         </ion-list-header>
         <ion-item>
   <ion-slides >
     <ion-slide *ngFor="let item of resdata.currarray" >      
-      <img src="http://athena3d.com.br/bioatest/{{item.pimg}}" class="slide-image" (click)="slideTap(item.pimg)"/>
+      <img src="http://athena3d.com.br/bioatest/{{item.pimg}}" class="slide-image" (click)="slideTap(item.fullpimg)"/>
     </ion-slide>
   </ion-slides>
   </ion-item>
@@ -222,7 +226,14 @@ transform( array: Array<any>, orderType: boolean ): Array<any> {
     <img src="http://athena3d.com.br/bioatest/{{itempimg}}" />   
   </ion-item>
   
-  <ion-item><b>Sobre:</b><button style="text-align: right" item-right icon-right (click)="likeit()">1.109<ion-icon color="cor2" name="heart"></ion-icon></button>
+  <ion-item text-wrap text-justify  *ngIf="infodata.historico!=null"><b>Sobre:</b>
+  <p>{{infodata.historico}}</p>
+  </ion-item>
+  <ion-item text-wrap text-justify *ngIf="infodata.valores!=null"><b>Valores:</b>
+  <p>{{infodata.valores}}</p>
+  </ion-item>
+   <ion-item text-wrap text-justify *ngIf="infodata.missao!=null"><b>Missão:</b>
+  <p>{{infodata.missao}}</p>
   </ion-item>
   </ion-list>
 </ion-content>
@@ -236,6 +247,11 @@ export class Produtor_PV {
   respage:any;
   res:any;
   resdata: ResultData ;
+  public infodata: {   
+    historico?:string,
+    valores?:string,
+    missao?:string
+  };
   showimg:Boolean=false;
   imgindex:number=-1;
   itempimg:any;
@@ -253,6 +269,8 @@ export class Produtor_PV {
     this.res = NP.get('res');
     this.resdata = new ResultData("porproduto");
     this.respage.ts.getImgsListUsrID(this.respage, this.resdata,this.res);
+    this.infodata = new ResultData("porproduto");
+    this.respage.ts.getInfoPROD_PV(this.infodata,this.res);
   }
 
   ngAfterViewInit() {
@@ -325,9 +343,14 @@ export class PaginaResultado implements ModalOptions{
 
   }
 
-  alerta(res){
+  pontovenda(res){
      let popover = this.popoverCtrl.create(Produtor_PV,{respage:this,res:res});
     popover.present();
+
+  }
+
+  alerta(res){
+    
 
   }
 
