@@ -580,6 +580,30 @@ export class TarefaService  {
         });        
     }
 
+    addLike(respage,res) {
+        var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
+        htmlwrapper.bodyparams.add("key", "novacurtida");
+        htmlwrapper.bodyparams.add("idusralvo", res.id);
+        htmlwrapper.dopostusrid(function (ts, data) {
+            if (data.result === "ok") {
+                res.liked=true;
+            }
+            else {
+                htmlwrapper.bodyparams.params[0].valor = "apagacurtida";
+                htmlwrapper.dopost(function (ts, data) {
+                    if (data.result === "ok") {                       
+                        res.liked=false;
+                    }
+                    else {
+                        ts.sendNotification('Algo deu errado! Tente novamente.');
+                    }
+                });
+            }
+        });
+    }
+
+    
+
     deleteIMG(principal, menuitem, linha) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "deleteimg");
@@ -728,11 +752,12 @@ export class TarefaService  {
 
     
 
+    
+
     getCertListUsrId(page: any, mn: any, idusr: any) {
         var htmlwrapper: HtmlWrapper = new HtmlWrapper(this);
         htmlwrapper.bodyparams.add("key", "getcertlistusr");
-        htmlwrapper.bodyparams.add("idusuario", idusr);
-        
+        htmlwrapper.bodyparams.add("idusuario", idusr);        
         htmlwrapper.doget(function (ts, data) {
             if (data[0].id != "null") {
                 data.forEach(row => {
@@ -899,7 +924,8 @@ export class TarefaService  {
                         estado: row.estado,
                         cep: row.cep,
                         fone: row.fone,
-                        tipo: row.tipo
+                        tipo: row.tipo,
+                        quantlikes:row.quantlikes
 
                     });
                     ts.getgeocode(page,page.resdata.currarray[page.resdata.currarray.length-1],false,data.length==page.resdata.currarray.length);

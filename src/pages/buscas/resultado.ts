@@ -28,6 +28,8 @@ export class ResultData{
     tipo: string,
     lat?:number,
     long?:number,
+    liked?:Boolean,
+    quantlikes:number,
     distancia?:number
    
   }>;
@@ -331,8 +333,8 @@ export class PaginaResultado implements ModalOptions{
 
   }
 
-  likeit(){
-
+  likeit(res){
+    this.ts.addLike(this,res);
   }
 
   contatar(){
