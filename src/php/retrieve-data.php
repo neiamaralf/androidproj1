@@ -54,18 +54,35 @@
     echo '[{"nome":"null"}]';
    }
    break;
+   case 'quantcurtidas':
+  $idusralvo=$_REQUEST['idusralvo'];
+  $sql="SELECT COUNT(*) FROM curtidas WHERE idusralvo=$idusralvo";
+  try {
+   $qr=$pdo->query($sql);
+   if($qr&&$qr->rowCount()>0){    
+    if($row=$stmt->fetch(PDO::FETCH_OBJ)){
+     $data[]=$row;
+    }
+    echo json_encode($data);
+   }
+   else
+    echo json_encode(array('result'=>'null'));
+  }
+  catch(PDOException $e){
+   echo json_encode(array('result'=>$e->getCode(),'msg'=>$e->getMessage()));
+  }
+  break;
   case 'porproduto':
-   $select="p.imagem AS pimg, lp.preco, lp.imagem AS lpimg,lp.nomeprod,usr.id,usr.nome,usr.endereco,usr.numero,usr.complemento,usr.bairro,usr.cidade,usr.estado,usr.cep,usr.fone,usr.tipo";
+   $idusuario=filter_var($_REQUEST['idusuario'],FILTER_SANITIZE_NUMBER_INT);
+   $select="(SELECT COUNT(*) AS isliked FROM curtidas WHERE idusuario=((lp.idusuario<<32)|$idusuario) AND idusralvo=lp.idusuario) AS isliked,(SELECT COUNT(*) AS quantlikes FROM curtidas WHERE idusralvo=lp.idusuario) AS quantlikes,p.imagem AS pimg, lp.preco, lp.imagem AS lpimg,lp.nomeprod,usr.id,usr.nome,usr.endereco,usr.numero,usr.complemento,usr.bairro,usr.cidade,usr.estado,usr.cep,usr.fone,usr.tipo";
    $from="produtos AS p,listaprodutos AS lp,usuarios AS usr";
    $where="p.id=".$_REQUEST['idprod']." AND lp.idproduto=p.id AND usr.id=lp.idusuario";
    $sql="SELECT ".$select." FROM ".$from." WHERE ".$where." LIMIT ".$_REQUEST['limit']." OFFSET ".$_REQUEST['offset'];
-  // $sql="SELECT prod.id,prod.nome,prod.imagem,prod.idcategoria,prod.idmarca FROM produtos as prod WHERE  prod.nome LIKE '".$_REQUEST['nome']."%' ORDER BY prod.nome LIMIT ".$_REQUEST['limit']." OFFSET ".$_REQUEST['offset'];
    $stmt=$pdo->query($sql);
    if($stmt->rowCount()>0){
     while($row=$stmt->fetch(PDO::FETCH_OBJ)){
      $data[]=$row;
     }
-   // mb_convert_variables('UTF-8','ISO-8859-1',$data);
     echo json_encode($data);
    }
    else{

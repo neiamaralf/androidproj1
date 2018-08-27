@@ -378,20 +378,20 @@ export class TarefaService  {
         });
     }
 
-    assertlogin(nav: any, page: any,cab:any) {
+    assertlogin(nav: any, page: any, cab: any) {
         this.storage.ready().then(() => {
             this.storage.get('userid').then((userid) => {
                 this.storage.get('token').then((token) => {
-                    this.verificatoken(token, userid, nav, page,cab);
-                }).catch(function (e) {
-                    //this.loginprompt(nav, page);
+                    this.verificatoken(token, userid, nav, page, cab);
+                })
+                    .catch(function (e) {
+                    });
+            })
+                .catch(function (e) {
                 });
-            }).catch(function (e) {
-               // this.loginprompt(nav, page);
-                });
-        }).catch(function (e) {
-           // this.loginprompt(nav, page);
-        });;
+        })
+            .catch(function (e) {
+            });;
     }
 
     verificatoken(token, userid, nav: any, page: any,cab:any) {
@@ -587,12 +587,14 @@ export class TarefaService  {
         htmlwrapper.dopostusrid(function (ts, data) {
             if (data.result === "ok") {
                 res.liked=true;
+                res.quantlikes++;
             }
             else {
                 htmlwrapper.bodyparams.params[0].valor = "apagacurtida";
                 htmlwrapper.dopost(function (ts, data) {
                     if (data.result === "ok") {                       
                         res.liked=false;
+                        res.quantlikes--;
                     }
                     else {
                         ts.sendNotification('Algo deu errado! Tente novamente.');
@@ -905,7 +907,7 @@ export class TarefaService  {
         htmlwrapper.bodyparams.add("offset", page.offset);
         htmlwrapper.bodyparams.add("limit", page.limit);
        
-        htmlwrapper.doget(function (ts, data) {
+        htmlwrapper.dogetusrid(function (ts, data) {
             if (data[0].nome != "null") {
                 console.log("data.length=",data.length);
                 data.forEach(row => {
@@ -925,7 +927,8 @@ export class TarefaService  {
                         cep: row.cep,
                         fone: row.fone,
                         tipo: row.tipo,
-                        quantlikes:row.quantlikes
+                        quantlikes:row.quantlikes,
+                        liked:row.isliked==1
 
                     });
                     ts.getgeocode(page,page.resdata.currarray[page.resdata.currarray.length-1],false,data.length==page.resdata.currarray.length);

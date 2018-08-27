@@ -215,7 +215,7 @@ transform( array: Array<any>, orderType: boolean ): Array<any> {
 <ion-content>
  <ion-list no-lines>
         <ion-list-header color="cor2">{{res.nome}}
-           <button style="text-align: right" item-right icon-right (click)="likeit()">1.109<ion-icon color="cor2" name="heart"></ion-icon></button>
+           <button ion-button item-right clear icon-right (click)="respage.likeit(res)">{{res.quantlikes}}<ion-icon color="red" [name]="res.liked?'heart':'heart-outline'"></ion-icon></button>
         </ion-list-header>
         <ion-item>
   <ion-slides >
@@ -237,6 +237,11 @@ transform( array: Array<any>, orderType: boolean ): Array<any> {
    <ion-item text-wrap text-justify *ngIf="infodata.missao!=null"><b>Missão:</b>
   <p>{{infodata.missao}}</p>
   </ion-item>
+  </ion-list>
+  <ion-list *ngIf="res.tipo==2">
+   <ion-list-header color="cor2">PONTOS DE VENDA</ion-list-header>
+    <ion-item>
+    </ion-item>
   </ion-list>
 </ion-content>
 <ion-footer>
@@ -269,6 +274,7 @@ export class Produtor_PV {
   constructor(public NP: NavParams) {
     this.respage = NP.get('respage');
     this.res = NP.get('res');
+    console.log('res.tipo=', this.res.tipo);
     this.resdata = new ResultData("porproduto");
     this.respage.ts.getImgsListUsrID(this.respage, this.resdata,this.res);
     this.infodata = new ResultData("porproduto");

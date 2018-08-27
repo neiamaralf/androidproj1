@@ -7,10 +7,7 @@
  $db='athen394_bioatest';
  $cs='utf8';
  $dsn="mysql:host=".$hn.";port=3306;dbname=".$db.";charset=".$cs;
- $opt=array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_OBJ,
-            PDO::ATTR_EMULATE_PREPARES=>false,
-            );
+ $opt=array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_OBJ,PDO::ATTR_EMULATE_PREPARES=>false,);
  $pdo=new PDO($dsn,$un,$pwd,$opt);
  $key=strip_tags($_REQUEST['key']);
  $data=array();
@@ -173,9 +170,11 @@
    echo json_encode(array('result'=>$e->getCode(),'msg'=>$e->getMessage()));
   }
   break;
+
  case 'apagacurtida':
   $idusuario=$_REQUEST['idusuario'];
   $idusralvo=$_REQUEST['idusralvo'];
+  $idusuario=$idusuario|($idusralvo<<32);
   $sql="DELETE FROM curtidas WHERE idusuario=$idusuario AND idusralvo=$idusralvo";
   try {
    $qr=$pdo->query($sql);

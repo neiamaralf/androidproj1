@@ -30,18 +30,47 @@ function uploadimage($new_width,$new_height,$diretorio,$filename,$ext,$tmpfilena
  $image=NULL;
  //$ext = $_FILES["foto1"]["type"];
  $imagefs=NULL;
- /*if($ext=="image/jpg"||$ext=="image/jpeg") $image = imagecreatefromjpeg($tmpfilename);
+ if($ext=="image/jpg"||$ext=="image/jpeg") $image = imagecreatefromjpeg($tmpfilename);
  else if ($ext=="image/gif") $image = imagecreatefromgif($tmpfilename);
- else */if($ext=="image/png") $image = imagecreatefrompng($tmpfilename);
+ else if($ext=="image/png")$image = imagecreatefrompng($tmpfilename);
    
- $image_p=resizeimage($image,$new_width,$new_height);		
+ $image_p=resizeimage($image,$new_width,$new_height);		 
 				
- /*if($ext=="image/jpg"||$ext=="image/jpeg")imagejpeg($image_p,$diretorio.$filename);
+ if($ext=="image/jpg"||$ext=="image/jpeg")imagejpeg($image_p,$diretorio.$filename);
  else if($ext=="image/gif")imagegif($image_p,$diretorio.$filename);
- else */if($ext=="image/png")imagepng($image_p,$diretorio.$filename);
+ else if($ext=="image/png")imagepng($image_p,$diretorio.$filename);
 	  $ret=$image_p!=null;
  imagedestroy($image);
  imagedestroy($image_p);
  return $ret;
+}
+
+function getBytesFromHexString($hexdata)
+{
+  for($count = 0; $count < strlen($hexdata); $count+=2)
+    $bytes[] = chr(hexdec(substr($hexdata, $count, 2)));
+
+  return implode($bytes);
+}
+
+function getImageMimeType($imagedata)
+{
+  $imagemimetypes = array( 
+    "jpeg" => "FFD8", 
+    "png" => "89504E470D0A1A0A", 
+    "gif" => "474946",
+    "bmp" => "424D", 
+    "tiff" => "4949",
+    "tiff" => "4D4D"
+  );
+
+  foreach ($imagemimetypes as $mime => $hexbytes)
+  {
+    $bytes = getBytesFromHexString($hexbytes);
+    if (substr($imagedata, 0, strlen($bytes)) == $bytes)
+      return $mime;
+  }
+
+  return NULL;
 }
 ?>

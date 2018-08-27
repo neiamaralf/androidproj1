@@ -366,7 +366,7 @@ export class Principal  implements OnDestroy{
   deletaImagem(menuitem, linha) {
     this.ts.tabela=menuitem.tabela;
     this.ts.deleteIMG(this,menuitem, linha);
-  }
+  } 
 
   base64MimeType(encoded) {
     var result = null;

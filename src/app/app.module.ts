@@ -21,6 +21,7 @@ import { Camera } from '@ionic-native/camera';
 import { ElasticModule } from 'angular2-elastic';
 import { ListaPage } from '../pages/listaprodutos/listaprodutos';
 import { Geolocation } from '@ionic-native/geolocation';
+import { IonicStorageModule, Storage } from '@ionic/storage';
 @NgModule({
   declarations: [
     BioatestApp,
@@ -38,7 +39,7 @@ import { Geolocation } from '@ionic-native/geolocation';
     Produtor_PV
   ],
   imports: [
-    IonicModule.forRoot(BioatestApp),ElasticModule
+    IonicModule.forRoot(BioatestApp),ElasticModule,IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [

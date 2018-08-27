@@ -58,7 +58,7 @@
                             <button ion-item class="menudir" (click)="alerta(res)">
                                 ALERTA
                             </button>
-                            <button style="text-align: right" ion-item icon-right (click)="likeit(res)">{{res.quantlikes}}<ion-icon color="cor2" [name]="res.liked?'heart':'heart-outline'"></ion-icon></button>
+                            <button style="text-align: right" ion-button clear item-right icon-right (click)="likeit(res)">{{res.quantlikes}}<ion-icon color="red" [name]="res.liked?'heart':'heart-outline'"></ion-icon></button>
                         </ion-list>
                     </ion-col>
                 </ion-row>
